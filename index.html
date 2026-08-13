@@ -369,24 +369,32 @@ function renderApp() {
     n.onclick = () => navigate(n.dataset.page)
   })
   navigate(location.hash.slice(1) || 'home')
-  window.addEventListener('hashchange', () => navigate(location.hash.slice(1) || 'home'))
+  window.addEventListener('hashchange', () => {
+    const p = location.hash.slice(1) || 'home'
+    if (p !== state.page) navigate(p)
+  })
 }
 
+let __navToken = 0
 async function navigate(page) {
   if (!['home','food','weight','gym'].includes(page)) page = 'home'
+  if (state.page === page && document.getElementById('page-content')?.dataset.rendered === page) return
   state.page = page
-  location.hash = page
+  const token = ++__navToken
+  if (location.hash.slice(1) !== page) history.replaceState(null, '', '#' + page)
   document.querySelectorAll('.nav-item').forEach(n => n.classList.toggle('active', n.dataset.page === page))
   document.querySelector('.app-container').className = 'app-container page-' + page
   const content = document.getElementById('page-content')
+  content.dataset.rendered = ''
   content.innerHTML = '<div class="loading">Loading…</div>'
   try {
     if (page === 'home') await renderHome(content)
     else if (page === 'food') await renderFood(content)
     else if (page === 'weight') await renderWeight(content)
     else if (page === 'gym') await renderGym(content)
+    if (token === __navToken) content.dataset.rendered = page
   } catch (e) {
-    content.innerHTML = `<div class="empty"><i class="ti ti-alert-circle"></i>${esc(e.message)}</div>`
+    if (token === __navToken) content.innerHTML = `<div class="empty"><i class="ti ti-alert-circle"></i>${esc(e.message)}</div>`
     console.error(e)
   }
 }
