@@ -1,0 +1,14 @@
+{
+  "name": "GymLog",
+  "short_name": "GymLog",
+  "description": "Track meals, weight, and lifts",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#ffffff",
+  "theme_color": "#111111",
+  "icons": [
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}

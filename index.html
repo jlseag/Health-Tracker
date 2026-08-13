@@ -1,0 +1,1691 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+<meta name="theme-color" content="#111111" />
+<title>GymLog</title>
+<link rel="manifest" href="manifest.json" />
+<link rel="icon" type="image/svg+xml" href="icon.svg" />
+<link rel="apple-touch-icon" href="icon.svg" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="default" />
+<meta name="apple-mobile-web-app-title" content="GymLog" />
+<meta name="mobile-web-app-capable" content="yes" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css" />
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+html, body { height: 100%; }
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  background: #F5F5F4;
+  color: #171717;
+  font-size: 15px;
+  line-height: 1.5;
+  overscroll-behavior-y: none;
+  -webkit-font-smoothing: antialiased;
+}
+button, input, textarea, select { font: inherit; color: inherit; }
+button { cursor: pointer; border: none; background: none; }
+input, textarea, select { outline: none; }
+input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+input[type="number"] { -moz-appearance: textfield; }
+
+/* ═══ Root layout ═══ */
+:root {
+  --bg: #F5F5F4;
+  --surface: #FFFFFF;
+  --surface-alt: #F5F5F4;
+  --border: #E7E5E4;
+  --text: #171717;
+  --text-secondary: #57534E;
+  --text-muted: #A8A29E;
+  --radius: 10px;
+  --food: #10B981; --food-dark: #064E3B; --food-mid: #047857; --food-bg: #ECFDF5; --food-border: #A7F3D0;
+  --weight: #2563EB; --weight-dark: #1E3A8A; --weight-mid: #1E40AF; --weight-bg: #EFF6FF; --weight-border: #BFDBFE;
+  --gym: #DC2626; --gym-dark: #7F1D1D; --gym-mid: #991B1B; --gym-bg: #FEF2F2; --gym-border: #FECACA;
+  --protein: #DC2626; --protein-bg: #FEE2E2;
+  --carbs: #2563EB; --carbs-bg: #DBEAFE;
+  --fat: #EAB308; --fat-bg: #FEF9C3;
+  --fiber: #166534; --fiber-bg: #DCFCE7;
+}
+
+.app-container { max-width: 480px; margin: 0 auto; min-height: 100vh; background: var(--surface); position: relative; padding-bottom: 72px; }
+
+/* ═══ Auth screen ═══ */
+.auth-wrap { min-height: 100vh; display: flex; flex-direction: column; justify-content: center; padding: 24px; max-width: 400px; margin: 0 auto; }
+.auth-logo { text-align: center; margin-bottom: 32px; }
+.auth-logo h1 { font-size: 36px; font-weight: 700; letter-spacing: -0.02em; margin-bottom: 6px; }
+.auth-logo p { color: var(--text-secondary); font-size: 14px; }
+.auth-card { background: var(--surface); border: 0.5px solid var(--border); border-radius: 16px; padding: 24px; }
+.auth-tabs { display: flex; gap: 4px; padding: 3px; background: var(--surface-alt); border-radius: 10px; margin-bottom: 20px; }
+.auth-tab { flex: 1; padding: 8px; text-align: center; font-size: 14px; font-weight: 500; color: var(--text-secondary); border-radius: 8px; }
+.auth-tab.active { background: var(--surface); color: var(--text); box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+.form-group { margin-bottom: 14px; }
+.form-label { display: block; font-size: 12px; font-weight: 500; color: var(--text-secondary); margin-bottom: 6px; }
+.form-input { width: 100%; padding: 11px 14px; border: 0.5px solid var(--border); border-radius: 10px; background: var(--surface); font-size: 15px; }
+.form-input:focus { border-color: var(--text); }
+.btn-primary { width: 100%; padding: 12px; background: var(--text); color: white; border-radius: 10px; font-size: 15px; font-weight: 500; margin-top: 4px; }
+.btn-primary:disabled { opacity: 0.5; }
+.auth-err { color: var(--gym); font-size: 13px; margin-top: 8px; text-align: center; }
+.auth-ok { color: var(--food); font-size: 13px; margin-top: 8px; text-align: center; }
+
+/* ═══ Header ═══ */
+.header { position: sticky; top: 0; z-index: 50; padding: 14px 16px; border-bottom: 0.5px solid var(--border); display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 8px; background: var(--surface); }
+.header-title { font-size: 20px; font-weight: 500; }
+.header-center { font-size: 13px; font-weight: 500; color: var(--text-secondary); white-space: nowrap; text-align: center; display: flex; align-items: center; justify-content: center; gap: 4px; }
+.header-center i { font-size: 14px; color: var(--text-muted); cursor: pointer; }
+.avatar { justify-self: end; width: 32px; height: 32px; border-radius: 50%; background: var(--text); color: white; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 500; cursor: pointer; }
+
+.page-food .header { background: var(--food-bg); }
+.page-food .header-title, .page-food .header-center { color: var(--food-dark); }
+.page-food .header-center i { color: var(--food); }
+.page-food .avatar { background: var(--food); }
+
+.page-weight .header { background: var(--weight-bg); }
+.page-weight .header-title { color: var(--weight-dark); }
+.page-weight .avatar { background: var(--weight); }
+
+.page-gym .header { background: var(--gym-bg); }
+.page-gym .header-title { color: var(--gym-dark); }
+.page-gym .avatar { background: var(--gym); }
+
+/* ═══ Bottom nav ═══ */
+.bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; max-width: 480px; margin: 0 auto; background: var(--surface); border-top: 0.5px solid var(--border); display: flex; padding-bottom: env(safe-area-inset-bottom); z-index: 100; }
+.nav-item { flex: 1; text-align: center; padding: 10px 0 12px; color: var(--text-muted); font-size: 11px; font-weight: 500; cursor: pointer; }
+.nav-item i { font-size: 22px; display: block; margin-bottom: 2px; }
+.nav-item.active { color: var(--text); }
+.nav-item.active.food { color: var(--food); }
+.nav-item.active.weight { color: var(--weight); }
+.nav-item.active.gym { color: var(--gym); }
+
+/* ═══ Common ═══ */
+.section-label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; font-weight: 500; margin: 14px 0 8px; }
+.card { padding: 14px; background: var(--surface); border-radius: 14px; border: 0.5px solid var(--border); }
+.chip { display: inline-flex; align-items: center; gap: 3px; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 500; }
+.chip-pr { background: var(--food); color: white; }
+.chip-pr-red { background: var(--gym); color: white; }
+.pill { display: inline-flex; align-items: center; gap: 5px; padding: 5px 12px; border: 0.5px solid var(--border); border-radius: 999px; font-size: 12px; cursor: pointer; background: var(--surface); }
+.pill i { color: var(--text-muted); font-size: 13px; }
+.progress-bar { height: 12px; background: var(--surface-alt); border-radius: 999px; overflow: hidden; }
+.progress-bar .fill { height: 100%; border-radius: 999px; transition: width 0.3s; }
+.progress-sm { height: 9px; }
+
+/* ═══ Modal ═══ */
+.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 200; display: none; align-items: flex-end; justify-content: center; }
+.modal-overlay.open { display: flex; }
+.modal { background: var(--surface); border-radius: 20px 20px 0 0; width: 100%; max-width: 480px; max-height: 92vh; overflow-y: auto; }
+@media (min-width: 500px) { .modal-overlay { align-items: center; } .modal { border-radius: 20px; margin: 20px; max-height: 90vh; } }
+.modal-header { position: sticky; top: 0; padding: 14px 16px; border-bottom: 0.5px solid var(--border); display: flex; align-items: center; justify-content: space-between; background: var(--surface); z-index: 10; }
+.modal-title { font-size: 16px; font-weight: 500; }
+.modal-close { font-size: 22px; color: var(--text-secondary); }
+.modal-body { padding: 18px 16px; }
+.modal-footer { position: sticky; bottom: 0; padding: 12px 16px 16px; display: flex; gap: 8px; background: var(--surface); border-top: 0.5px solid var(--border); }
+.btn-secondary { flex: 1; padding: 11px; border: 0.5px solid var(--border); border-radius: 10px; font-size: 14px; font-weight: 500; background: var(--surface); }
+.btn-save { flex: 2; padding: 11px; background: var(--text); color: white; border-radius: 10px; font-size: 14px; font-weight: 500; }
+.btn-save.food { background: var(--food); }
+.btn-save.weight { background: var(--weight); }
+.btn-save.gym { background: var(--gym); }
+.btn-danger { padding: 11px 14px; background: transparent; color: var(--gym); border: 0.5px solid var(--border); border-radius: 10px; }
+
+.field-inline { display: flex; align-items: center; padding: 10px 14px; border: 0.5px solid var(--border); border-radius: 10px; background: var(--surface); }
+.field-inline input { border: none; background: transparent; flex: 1; padding: 0; font-size: 15px; }
+.field-suffix { color: var(--text-muted); font-size: 13px; margin-left: 6px; }
+
+.section-pills { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 14px; }
+.section-pill { padding: 7px 14px; font-size: 13px; border: 0.5px solid var(--border); border-radius: 999px; background: var(--surface); cursor: pointer; }
+.section-pill.active { background: var(--text); color: white; font-weight: 500; border-color: var(--text); }
+
+/* ═══ Empty states ═══ */
+.empty { padding: 32px 20px; text-align: center; color: var(--text-muted); font-size: 14px; }
+.empty i { font-size: 32px; display: block; margin-bottom: 8px; opacity: 0.5; }
+
+/* ═══ Toast ═══ */
+.toast { position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%); padding: 12px 20px; background: var(--text); color: white; border-radius: 999px; font-size: 13px; font-weight: 500; z-index: 300; opacity: 0; transition: opacity 0.2s; pointer-events: none; }
+.toast.show { opacity: 1; }
+.toast.err { background: var(--gym); }
+
+/* Loading */
+.loading { padding: 60px 20px; text-align: center; color: var(--text-muted); font-size: 13px; }
+
+/* ═══ Chart tooltip popover ═══ */
+.chart-info { margin-top: 10px; padding: 12px 14px; border-radius: 10px; display: none; }
+.chart-info.show { display: block; }
+.chart-info.food { background: var(--food-bg); color: var(--food-mid); }
+.chart-info.weight { background: var(--weight-bg); color: var(--weight-mid); }
+.chart-info.gym { background: var(--gym-bg); color: var(--gym-mid); }
+.chart-info .ci-title { font-size: 13px; font-weight: 500; margin-bottom: 4px; display: flex; align-items: center; justify-content: space-between; }
+.chart-info .ci-actions { display: flex; gap: 6px; margin-top: 8px; }
+.chart-info .ci-actions button { flex: 1; padding: 7px; font-size: 12px; background: var(--surface); border-radius: 8px; }
+</style>
+</head>
+<body>
+
+<div id="app-root">
+  <div class="loading" id="boot-loading">Loading…</div>
+</div>
+
+<!-- ═══ AUTH SCREEN TEMPLATE ═══ -->
+<template id="tpl-auth">
+  <div class="auth-wrap">
+    <div class="auth-logo">
+      <h1>GymLog</h1>
+      <p>Track meals, weight, and lifts</p>
+    </div>
+    <div class="auth-card">
+      <div class="auth-tabs">
+        <div class="auth-tab active" data-mode="signin">Sign in</div>
+        <div class="auth-tab" data-mode="signup">Sign up</div>
+      </div>
+      <form id="auth-form">
+        <div class="form-group" id="fg-name" style="display:none">
+          <label class="form-label">Display name</label>
+          <input class="form-input" type="text" id="auth-name" autocomplete="name" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Email</label>
+          <input class="form-input" type="email" id="auth-email" required autocomplete="email" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Password</label>
+          <div style="position: relative;">
+            <input class="form-input" type="password" id="auth-pw" required minlength="6" autocomplete="current-password" style="padding-right: 44px;" />
+            <button type="button" id="auth-pw-toggle" aria-label="Show password" style="position: absolute; right: 8px; top: 50%; transform: translateY(-50%); padding: 8px; color: var(--text-muted); background: transparent;"><i class="ti ti-eye" style="font-size: 18px;"></i></button>
+          </div>
+        </div>
+        <button class="btn-primary" type="submit" id="auth-submit">Sign in</button>
+        <div class="auth-err" id="auth-err" style="display:none"></div>
+        <div class="auth-ok" id="auth-ok" style="display:none"></div>
+      </form>
+    </div>
+  </div>
+</template>
+
+<!-- ═══ APP TEMPLATE ═══ -->
+<template id="tpl-app">
+  <div class="app-container">
+    <div id="page-content"></div>
+    <nav class="bottom-nav">
+      <div class="nav-item" data-page="home"><i class="ti ti-home"></i>Home</div>
+      <div class="nav-item food" data-page="food"><i class="ti ti-bowl"></i>Food</div>
+      <div class="nav-item weight" data-page="weight"><i class="ti ti-scale"></i>Weight</div>
+      <div class="nav-item gym" data-page="gym"><i class="ti ti-barbell"></i>Gym</div>
+    </nav>
+  </div>
+</template>
+
+<div class="toast" id="toast"></div>
+
+<!-- ═══ MODAL ROOT ═══ -->
+<div class="modal-overlay" id="modal-root">
+  <div class="modal" id="modal-content"></div>
+</div>
+
+<script type="module">
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+
+const SUPABASE_URL = 'https://uzikdygeaacqtdqniyzf.supabase.co'
+const SUPABASE_KEY = 'sb_publishable_xt1J3mqvjv_SnunS5I3eIQ_KJyFmGpp'
+const sb = createClient(SUPABASE_URL, SUPABASE_KEY)
+
+// ═══ Global state ═══
+const state = {
+  user: null,
+  profile: null,
+  page: 'home',
+  food: { date: todayISO(), meals: [], history: [], range: 7 },
+  weight: { unit: 'kg', logs: [], range: 7, date: todayISO() },
+  gym: { groups: [], exercises: {}, activeGroup: null, prs: {}, chartExercise: null, chartData: [], range: 30, date: todayISO() },
+}
+
+// ═══ Helpers ═══
+function todayISO() { return new Date().toISOString().slice(0,10) }
+function fmtDate(iso, opts={}) {
+  const d = new Date(iso + 'T00:00:00')
+  const t = new Date(); t.setHours(0,0,0,0)
+  const diff = Math.round((t - d) / 86400000)
+  if (opts.smart) {
+    if (diff === 0) return 'Today'
+    if (diff === 1) return 'Yesterday'
+  }
+  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+}
+function fmtLongDate(iso) {
+  const d = new Date(iso + 'T00:00:00')
+  return d.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })
+}
+function el(html) { const t = document.createElement('template'); t.innerHTML = html.trim(); return t.content.firstElementChild }
+function esc(s) { return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])) }
+function toast(msg, err=false) {
+  const t = document.getElementById('toast')
+  t.textContent = msg; t.className = 'toast show' + (err ? ' err' : '')
+  clearTimeout(toast._t); toast._t = setTimeout(()=>{ t.className = 'toast' + (err?' err':'') }, 1800)
+}
+function kgToLbs(kg) { return kg * 2.20462 }
+function lbsToKg(lbs) { return lbs / 2.20462 }
+function dispWeight(kg, unit) { return unit === 'lbs' ? (kgToLbs(kg)).toFixed(1) : kg.toFixed(1) }
+function initialsFrom(str) {
+  if (!str) return '?'
+  const parts = str.trim().split(/\s+/); return (parts[0][0] + (parts[1]?.[0] ?? '')).toUpperCase()
+}
+
+// ═══ Modal helpers ═══
+function openModal(html) {
+  document.getElementById('modal-content').innerHTML = html
+  document.getElementById('modal-root').classList.add('open')
+  document.body.style.overflow = 'hidden'
+}
+function closeModal() {
+  document.getElementById('modal-root').classList.remove('open')
+  document.body.style.overflow = ''
+}
+document.getElementById('modal-root').addEventListener('click', e => {
+  if (e.target.id === 'modal-root') closeModal()
+})
+
+// ═══ Auth flow ═══
+async function bootstrap() {
+  const { data: { session } } = await sb.auth.getSession()
+  if (!session) return renderAuth()
+  state.user = session.user
+  await loadProfile()
+  renderApp()
+}
+async function loadProfile() {
+  const { data } = await sb.from('profiles').select('*').eq('id', state.user.id).single()
+  state.profile = data
+  state.weight.unit = data?.weight_unit || 'kg'
+}
+sb.auth.onAuthStateChange((event, session) => {
+  if (event === 'SIGNED_OUT') { state.user = null; renderAuth() }
+})
+
+function renderAuth() {
+  const root = document.getElementById('app-root')
+  root.innerHTML = ''
+  root.appendChild(document.getElementById('tpl-auth').content.cloneNode(true))
+  let mode = 'signin'
+  root.querySelectorAll('.auth-tab').forEach(t => {
+    t.onclick = () => {
+      mode = t.dataset.mode
+      root.querySelectorAll('.auth-tab').forEach(x => x.classList.toggle('active', x === t))
+      root.querySelector('#fg-name').style.display = mode === 'signup' ? '' : 'none'
+      root.querySelector('#auth-submit').textContent = mode === 'signup' ? 'Create account' : 'Sign in'
+      root.querySelector('#auth-pw').autocomplete = mode === 'signup' ? 'new-password' : 'current-password'
+    }
+  })
+  const pwInput = root.querySelector('#auth-pw')
+  const pwToggle = root.querySelector('#auth-pw-toggle')
+  pwToggle.onclick = () => {
+    const shown = pwInput.type === 'text'
+    pwInput.type = shown ? 'password' : 'text'
+    pwToggle.querySelector('i').className = 'ti ' + (shown ? 'ti-eye' : 'ti-eye-off')
+    pwToggle.setAttribute('aria-label', shown ? 'Show password' : 'Hide password')
+  }
+  root.querySelector('#auth-form').onsubmit = async e => {
+    e.preventDefault()
+    const email = root.querySelector('#auth-email').value.trim()
+    const pw = root.querySelector('#auth-pw').value
+    const name = root.querySelector('#auth-name').value.trim()
+    const btn = root.querySelector('#auth-submit')
+    const err = root.querySelector('#auth-err')
+    const ok = root.querySelector('#auth-ok')
+    err.style.display = 'none'; ok.style.display = 'none'
+    btn.disabled = true; btn.textContent = 'Working…'
+    try {
+      let result
+      if (mode === 'signup') {
+        result = await sb.auth.signUp({ email, password: pw, options: { data: { display_name: name || email.split('@')[0] } } })
+      } else {
+        result = await sb.auth.signInWithPassword({ email, password: pw })
+      }
+      if (result.error) throw result.error
+      if (mode === 'signup' && !result.data.session) {
+        ok.textContent = 'Check your email to confirm your account.'
+        ok.style.display = 'block'
+        btn.disabled = false; btn.textContent = 'Create account'
+        return
+      }
+      state.user = result.data.session.user
+      await loadProfile()
+      renderApp()
+    } catch (e) {
+      err.textContent = e.message || 'Something went wrong'
+      err.style.display = 'block'
+      btn.disabled = false; btn.textContent = mode === 'signup' ? 'Create account' : 'Sign in'
+    }
+  }
+}
+
+// ═══ App shell ═══
+function renderApp() {
+  const root = document.getElementById('app-root')
+  root.innerHTML = ''
+  root.appendChild(document.getElementById('tpl-app').content.cloneNode(true))
+  root.querySelectorAll('.nav-item').forEach(n => {
+    n.onclick = () => navigate(n.dataset.page)
+  })
+  navigate(location.hash.slice(1) || 'home')
+  window.addEventListener('hashchange', () => navigate(location.hash.slice(1) || 'home'))
+}
+
+async function navigate(page) {
+  if (!['home','food','weight','gym'].includes(page)) page = 'home'
+  state.page = page
+  location.hash = page
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.toggle('active', n.dataset.page === page))
+  document.querySelector('.app-container').className = 'app-container page-' + page
+  const content = document.getElementById('page-content')
+  content.innerHTML = '<div class="loading">Loading…</div>'
+  try {
+    if (page === 'home') await renderHome(content)
+    else if (page === 'food') await renderFood(content)
+    else if (page === 'weight') await renderWeight(content)
+    else if (page === 'gym') await renderGym(content)
+  } catch (e) {
+    content.innerHTML = `<div class="empty"><i class="ti ti-alert-circle"></i>${esc(e.message)}</div>`
+    console.error(e)
+  }
+}
+
+function pageHeader(title, opts={}) {
+  const centerHTML = opts.centerHTML || `<span>${esc(opts.center || '')}</span>`
+  const initials = initialsFrom(state.profile?.display_name || state.user?.email)
+  return `
+    <div class="header">
+      <div class="header-title">${esc(title)}</div>
+      <div class="header-center">${centerHTML}</div>
+      <div class="avatar" onclick="window.__openAccount()">${esc(initials)}</div>
+    </div>`
+}
+
+window.__openAccount = () => openAccountModal()
+
+function openAccountModal() {
+  openModal(`
+    <div class="modal-header">
+      <div class="modal-close" onclick="window.__closeModal()"><i class="ti ti-x"></i></div>
+      <div class="modal-title">Account</div>
+      <div style="width:20px"></div>
+    </div>
+    <div class="modal-body">
+      <div style="text-align:center; padding: 12px 0 24px;">
+        <div class="avatar" style="width:64px;height:64px;font-size:22px;margin:0 auto 12px;">${esc(initialsFrom(state.profile?.display_name || state.user.email))}</div>
+        <div style="font-size:18px;font-weight:500;">${esc(state.profile?.display_name || 'You')}</div>
+        <div style="font-size:13px;color:var(--text-muted);">${esc(state.user.email)}</div>
+      </div>
+      <button class="btn-primary" style="background:var(--gym);" onclick="window.__signOut()">Sign out</button>
+    </div>
+  `)
+}
+window.__closeModal = closeModal
+window.__signOut = async () => { await sb.auth.signOut(); closeModal() }
+
+// ═══ PAGE: HOME ═══
+async function renderHome(root) {
+  root.innerHTML = ''
+  root.insertAdjacentHTML('beforeend', pageHeader('Home', { center: new Date().toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }) }))
+
+  // Fetch data
+  const today = todayISO()
+  const monthAgo = new Date(); monthAgo.setDate(monthAgo.getDate() - 30)
+  const monthAgoISO = monthAgo.toISOString().slice(0,10)
+  const weekAgo = new Date(); weekAgo.setDate(weekAgo.getDate() - 7)
+  const weekAgoISO = weekAgo.toISOString().slice(0,10)
+
+  const [{ data: recentMeals }, { data: recentWeights }, { data: recentPRs }, { data: latestWeight }] = await Promise.all([
+    sb.from('meals').select('logged_on,total_calories,total_protein_g').gte('logged_on', weekAgoISO).lte('logged_on', today),
+    sb.from('weight_logs').select('logged_on,weight_kg').gte('logged_on', monthAgoISO).order('logged_on', { ascending: false }),
+    sb.from('workout_sessions').select('performed_on,is_pr,max_weight_kg,exercise_id,exercises(name)').eq('is_pr', true).gte('performed_on', weekAgoISO).order('performed_on', { ascending: false }).limit(1),
+    sb.from('weight_logs').select('weight_kg,logged_on').order('logged_on', { ascending: false }).limit(1),
+  ])
+
+  const weekWorkoutsQ = await sb.from('workout_sessions').select('performed_on,exercise_id,exercises(muscle_group_id,muscle_groups(name))').gte('performed_on', weekAgoISO)
+  const weekWorkouts = weekWorkoutsQ.data || []
+
+  // Streak calculation — any activity per day
+  const activityDays = new Set()
+  ;(recentMeals || []).forEach(m => activityDays.add(m.logged_on))
+  ;(recentWeights || []).forEach(w => activityDays.add(w.logged_on))
+  ;weekWorkouts.forEach(w => activityDays.add(w.performed_on))
+  let streak = 0
+  const cur = new Date()
+  for (;;) {
+    const iso = cur.toISOString().slice(0,10)
+    if (activityDays.has(iso)) { streak++; cur.setDate(cur.getDate() - 1) } else break
+    if (streak > 365) break
+  }
+
+  // Highlights
+  const weightDelta = (() => {
+    if (!recentWeights || recentWeights.length < 2) return null
+    const now = recentWeights[0].weight_kg
+    const wkAgo = recentWeights.find(w => w.logged_on <= weekAgoISO) || recentWeights[recentWeights.length-1]
+    return { now, delta: now - wkAgo.weight_kg }
+  })()
+
+  const proteinDays = (() => {
+    const goal = state.profile?.daily_protein_goal || 160
+    const byDay = {}
+    ;(recentMeals || []).forEach(m => { byDay[m.logged_on] = (byDay[m.logged_on] || 0) + Number(m.total_protein_g || 0) })
+    const hits = Object.values(byDay).filter(g => g >= goal).length
+    const avg = Object.values(byDay).length ? Math.round(Object.values(byDay).reduce((a,b)=>a+b,0) / Object.values(byDay).length) : 0
+    return { hits, total: Object.keys(byDay).length || 0, avg, goal }
+  })()
+
+  const sessionCount = weekWorkouts.length
+  const groupsHit = [...new Set(weekWorkouts.map(w => w.exercises?.muscle_groups?.name).filter(Boolean))]
+
+  root.insertAdjacentHTML('beforeend', `
+    <div style="padding: 20px 16px 4px;">
+      <div style="font-size:22px;font-weight:500;margin-bottom:2px;">Nice week, ${esc((state.profile?.display_name || 'friend').split(' ')[0])}.</div>
+      <div style="font-size:13px;color:var(--text-secondary);">Here's what you crushed.</div>
+    </div>
+
+    <div style="margin:14px 16px 16px; padding:14px 16px; background: linear-gradient(135deg, #DC2626, #F59E0B); border-radius:14px; display:flex; align-items:center; gap:14px;">
+      <div style="width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;"><i class="ti ti-flame" style="font-size:26px;color:white;"></i></div>
+      <div style="flex:1;color:white;">
+        <div style="font-size:22px;font-weight:500;line-height:1;">${streak} day streak</div>
+        <div style="font-size:12px;opacity:.85;margin-top:4px;">${streak === 0 ? 'Log anything to start' : 'Logged something every day'}</div>
+      </div>
+    </div>
+
+    <div class="section-label" style="padding: 0 20px 8px;">This week's wins</div>
+    <div style="padding: 0 16px; display:flex; flex-direction:column; gap:10px;">
+
+      <div style="padding:16px;border-radius:14px;background:var(--food-bg);border-left:4px solid var(--food);display:flex;align-items:center;gap:14px;">
+        <div style="width:40px;height:40px;border-radius:12px;background:var(--food);display:flex;align-items:center;justify-content:center;"><i class="ti ti-scale" style="font-size:22px;color:white;"></i></div>
+        <div style="flex:1;">
+          <div style="font-size:12px;color:var(--food-mid);font-weight:500;text-transform:uppercase;letter-spacing:.5px;">Weight</div>
+          <div style="font-size:18px;font-weight:500;color:var(--food-dark);margin-top:2px;">${weightDelta ? (weightDelta.delta < 0 ? 'Down ' + Math.abs(weightDelta.delta).toFixed(1) + ' kg' : weightDelta.delta > 0 ? 'Up ' + weightDelta.delta.toFixed(1) + ' kg' : 'No change') : 'No data yet'}</div>
+          <div style="font-size:12px;color:var(--food-mid);margin-top:2px;">${weightDelta ? 'Latest: ' + dispWeight(weightDelta.now, state.weight.unit) + ' ' + state.weight.unit : 'Log your morning weight to start'}</div>
+        </div>
+      </div>
+
+      <div style="padding:16px;border-radius:14px;background:var(--gym-bg);border-left:4px solid var(--gym);display:flex;align-items:center;gap:14px;">
+        <div style="width:40px;height:40px;border-radius:12px;background:var(--gym);display:flex;align-items:center;justify-content:center;"><i class="ti ti-trophy" style="font-size:22px;color:white;"></i></div>
+        <div style="flex:1;">
+          <div style="font-size:12px;color:var(--gym-mid);font-weight:500;text-transform:uppercase;letter-spacing:.5px;">${recentPRs?.length ? 'New PR' : 'No new PR'}</div>
+          <div style="font-size:18px;font-weight:500;color:var(--gym-dark);margin-top:2px;">${recentPRs?.[0] ? esc(recentPRs[0].exercises.name) + ' · ' + Number(recentPRs[0].max_weight_kg).toFixed(1) + ' kg' : 'Beat your best to earn one'}</div>
+          ${recentPRs?.[0] ? '<div style="font-size:12px;color:var(--gym-mid);margin-top:2px;">' + fmtDate(recentPRs[0].performed_on, {smart:true}) + '</div>' : ''}
+        </div>
+      </div>
+
+      <div style="padding:16px;border-radius:14px;background:var(--weight-bg);border-left:4px solid var(--weight);display:flex;align-items:center;gap:14px;">
+        <div style="width:40px;height:40px;border-radius:12px;background:var(--weight);display:flex;align-items:center;justify-content:center;"><i class="ti ti-meat" style="font-size:22px;color:white;"></i></div>
+        <div style="flex:1;">
+          <div style="font-size:12px;color:var(--weight-mid);font-weight:500;text-transform:uppercase;letter-spacing:.5px;">Protein</div>
+          <div style="font-size:18px;font-weight:500;color:var(--weight-dark);margin-top:2px;">Hit target ${proteinDays.hits} / ${proteinDays.total} days</div>
+          <div style="font-size:12px;color:var(--weight-mid);margin-top:2px;">Avg ${proteinDays.avg}g · goal ${proteinDays.goal}g</div>
+        </div>
+      </div>
+
+      <div style="padding:16px;border-radius:14px;background:#FEFCE8;border-left:4px solid #CA8A04;display:flex;align-items:center;gap:14px;">
+        <div style="width:40px;height:40px;border-radius:12px;background:#CA8A04;display:flex;align-items:center;justify-content:center;"><i class="ti ti-barbell" style="font-size:22px;color:white;"></i></div>
+        <div style="flex:1;">
+          <div style="font-size:12px;color:#854D0E;font-weight:500;text-transform:uppercase;letter-spacing:.5px;">Workouts</div>
+          <div style="font-size:18px;font-weight:500;color:#713F12;margin-top:2px;">${sessionCount} session${sessionCount === 1 ? '' : 's'} logged</div>
+          <div style="font-size:12px;color:#854D0E;margin-top:2px;">${groupsHit.length ? groupsHit.join(' · ') : 'No workouts this week'}</div>
+        </div>
+      </div>
+
+    </div>
+
+    <div style="margin: 18px 16px 24px; padding: 14px 16px; border: 0.5px solid var(--border); border-radius: 14px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+        <div style="font-size:12px;color:var(--text-secondary);font-weight:500;text-transform:uppercase;letter-spacing:.5px;">Next milestone</div>
+        <div style="font-size:11px;color:var(--text-muted);">${streak} / 30 days</div>
+      </div>
+      <div style="font-size:14px;font-weight:500;margin-bottom:10px;">${Math.max(0, 30 - streak)} days to a 30-day streak</div>
+      <div class="progress-bar" style="height:8px;"><div class="fill" style="width:${Math.min(100, streak/30*100)}%;background:linear-gradient(90deg,#DC2626,#F59E0B);"></div></div>
+    </div>
+  `)
+}
+
+// ═══ Placeholder pages — loaded in later steps ═══
+async function renderFood(root) {
+  const date = state.food.date
+  const isToday = date === todayISO()
+  const centerHTML = `<i class="ti ti-chevron-left" id="fd-prev"></i><span id="fd-label">${isToday ? 'Today' : fmtLongDate(date)}</span><i class="ti ti-chevron-right" id="fd-next" style="${isToday ? 'opacity:0.3;pointer-events:none;' : ''}"></i>`
+  root.innerHTML = pageHeader('Food', { centerHTML })
+
+  root.querySelector('#fd-prev').onclick = () => shiftDate(root, -1)
+  root.querySelector('#fd-next').onclick = () => shiftDate(root, 1)
+
+  // Fetch meals for this date
+  const { data: meals, error } = await sb.from('meals')
+    .select('*, meal_items(*)')
+    .eq('logged_on', date)
+    .order('created_at', { ascending: true })
+  if (error) throw error
+  state.food.meals = meals || []
+
+  // Fetch history
+  const range = state.food.range
+  const start = new Date(date); start.setDate(start.getDate() - range + 1)
+  const startISO = start.toISOString().slice(0,10)
+  const { data: history } = await sb.from('meals')
+    .select('logged_on,total_calories')
+    .gte('logged_on', startISO).lte('logged_on', date)
+  state.food.history = history || []
+
+  const totals = (meals || []).reduce((a,m) => ({
+    kcal: a.kcal + Number(m.total_calories || 0),
+    p: a.p + Number(m.total_protein_g || 0),
+    c: a.c + Number(m.total_carbs_g || 0),
+    f: a.f + Number(m.total_fat_g || 0),
+    fi: a.fi + Number(m.total_fiber_g || 0),
+  }), { kcal: 0, p: 0, c: 0, f: 0, fi: 0 })
+
+  const goals = {
+    kcal: state.profile?.daily_calorie_goal || 2200,
+    p: state.profile?.daily_protein_goal || 160,
+    c: state.profile?.daily_carbs_goal || 220,
+    f: state.profile?.daily_fat_goal || 70,
+    fi: state.profile?.daily_fiber_goal || 30,
+  }
+  const pct = (v, g) => Math.min(100, Math.round(v / g * 100))
+
+  root.insertAdjacentHTML('beforeend', `
+    <div style="padding: 18px 16px;">
+      <div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:8px;">
+        <span style="font-size:15px;font-weight:500;">Calories</span>
+        <span style="font-size:14px;color:var(--text-secondary);"><span style="color:var(--food-dark);font-weight:500;font-size:15px;">${Math.round(totals.kcal).toLocaleString()}</span> / ${goals.kcal.toLocaleString()}</span>
+      </div>
+      <div class="progress-bar" style="background:var(--food-bg);"><div class="fill" style="width:${pct(totals.kcal, goals.kcal)}%;background:linear-gradient(90deg, var(--food), #059669);"></div></div>
+
+      <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin-top:20px;">
+        <div>
+          <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:6px;"><span style="font-weight:500;color:#991B1B;">Protein</span><span style="color:var(--text-secondary);">${Math.round(totals.p)} / ${goals.p}g</span></div>
+          <div class="progress-bar progress-sm" style="background:var(--protein-bg);"><div class="fill" style="width:${pct(totals.p, goals.p)}%;background:var(--protein);"></div></div>
+        </div>
+        <div>
+          <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:6px;"><span style="font-weight:500;color:#1E40AF;">Carbs</span><span style="color:var(--text-secondary);">${Math.round(totals.c)} / ${goals.c}g</span></div>
+          <div class="progress-bar progress-sm" style="background:var(--carbs-bg);"><div class="fill" style="width:${pct(totals.c, goals.c)}%;background:var(--carbs);"></div></div>
+        </div>
+        <div>
+          <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:6px;"><span style="font-weight:500;color:#854D0E;">Fat</span><span style="color:var(--text-secondary);">${Math.round(totals.f)} / ${goals.f}g</span></div>
+          <div class="progress-bar progress-sm" style="background:var(--fat-bg);"><div class="fill" style="width:${pct(totals.f, goals.f)}%;background:var(--fat);"></div></div>
+        </div>
+        <div>
+          <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:6px;"><span style="font-weight:500;color:var(--fiber);">Fiber</span><span style="color:var(--text-secondary);">${Math.round(totals.fi)} / ${goals.fi}g</span></div>
+          <div class="progress-bar progress-sm" style="background:var(--fiber-bg);"><div class="fill" style="width:${pct(totals.fi, goals.fi)}%;background:var(--fiber);"></div></div>
+        </div>
+      </div>
+    </div>
+
+    <div style="padding: 4px 14px 12px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:0 2px 10px;">
+        <div style="font-size:13px;font-weight:500;">Calorie history</div>
+        <div class="pill fd-range" style="border-color:var(--food-border);color:var(--food-dark);"><i class="ti ti-calendar" style="color:var(--food);"></i><span style="font-weight:500;">${rangeLabel(range)}</span><i class="ti ti-chevron-down" style="color:var(--food);"></i></div>
+      </div>
+      <div id="fd-chart"></div>
+    </div>
+
+    <div style="padding: 0 16px 12px;" id="fd-meals"></div>
+
+    <div style="padding: 0 16px 20px;">
+      <button class="btn-save food" style="width:100%;padding:14px;" onclick="window.__addMeal()"><i class="ti ti-plus" style="margin-right:6px;"></i>Add meal</button>
+    </div>
+  `)
+
+  root.querySelector('.fd-range').onclick = () => openRangeMenu('food', root)
+  window.__addMeal = () => openMealModal(root, {})
+
+  drawFoodChart(root)
+  renderMealSections(root)
+}
+
+function shiftDate(root, delta) {
+  const d = new Date(state.food.date); d.setDate(d.getDate() + delta)
+  const iso = d.toISOString().slice(0,10)
+  if (iso > todayISO()) return
+  state.food.date = iso
+  renderFood(root)
+}
+
+function drawFoodChart(root) {
+  const container = root.querySelector('#fd-chart')
+  const history = state.food.history
+  const range = state.food.range
+  const endDate = new Date(state.food.date)
+  const startDate = new Date(endDate); startDate.setDate(startDate.getDate() - range + 1)
+
+  // Build days array and sum kcal per day
+  const byDay = {}
+  history.forEach(h => { byDay[h.logged_on] = (byDay[h.logged_on] || 0) + Number(h.total_calories || 0) })
+  const days = []
+  const d = new Date(startDate)
+  while (d <= endDate) {
+    const iso = d.toISOString().slice(0,10)
+    days.push({ iso, kcal: byDay[iso] || 0 })
+    d.setDate(d.getDate() + 1)
+  }
+
+  const goal = state.profile?.daily_calorie_goal || 2200
+  const maxY = Math.max(goal * 1.2, ...days.map(x => x.kcal), 100)
+  const W = 320, H = 220, PAD_L = 8, PAD_R = 44, PAD_T = 20, PAD_B = 40
+  const plotW = W - PAD_L - PAD_R, plotH = H - PAD_T - PAD_B
+  const n = days.length
+  const barW = Math.max(6, Math.min(30, plotW / n * 0.7))
+  const step = plotW / n
+  const yAt = v => PAD_T + (1 - v / maxY) * plotH
+
+  const goalY = yAt(goal)
+  const bars = days.map((day, i) => {
+    const x = PAD_L + step * i + (step - barW) / 2
+    const y = yAt(day.kcal)
+    const h = (H - PAD_B) - y
+    const isToday = day.iso === state.food.date
+    return `<rect data-iso="${day.iso}" x="${x}" y="${y}" width="${barW}" height="${Math.max(0.5,h)}" rx="3" fill="${isToday ? 'var(--food)' : '#A7F3D0'}" ${isToday ? 'stroke="var(--food-dark)" stroke-width="1.2"' : ''} style="cursor:pointer;"/>`
+  }).join('')
+
+  const gridYs = [maxY * 0.75, maxY * 0.5, maxY * 0.25]
+  const gridLines = gridYs.map(v => `<line x1="0" y1="${yAt(v)}" x2="${W-PAD_R+4}" y2="${yAt(v)}" stroke="var(--border)" stroke-width="0.5" stroke-dasharray="2,3"/><text x="${W-2}" y="${yAt(v)+3}" font-size="10" fill="var(--text-muted)" text-anchor="end">${Math.round(v).toLocaleString()}</text>`).join('')
+
+  const xLabels = []
+  xLabels.push({ i: 0, l: fmtDate(days[0].iso) })
+  if (n > 2) xLabels.push({ i: Math.floor(n/2), l: fmtDate(days[Math.floor(n/2)].iso) })
+  if (n > 1) xLabels.push({ i: n-1, l: fmtDate(days[n-1].iso, {smart:true}) })
+  const xLabelHTML = xLabels.map(l => {
+    const x = PAD_L + step * l.i + step / 2
+    return `<text x="${x}" y="${H-15}" font-size="10" fill="var(--text-muted)" text-anchor="middle">${l.l}</text>`
+  }).join('')
+
+  container.innerHTML = `
+    <svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto;display:block;">
+      ${gridLines}
+      <line x1="0" y1="${goalY}" x2="${W-PAD_R+4}" y2="${goalY}" stroke="var(--food)" stroke-width="0.9" stroke-dasharray="4,3" opacity="0.7"/>
+      <text x="${W-2}" y="${goalY-3}" font-size="10" fill="var(--food-mid)" text-anchor="end" font-weight="500">Goal ${goal.toLocaleString()}</text>
+      ${bars}
+      <line x1="0" y1="${H-PAD_B}" x2="${W-PAD_R+4}" y2="${H-PAD_B}" stroke="var(--border)" stroke-width="0.7"/>
+      ${xLabelHTML}
+    </svg>`
+
+  container.querySelectorAll('rect[data-iso]').forEach(r => r.onclick = () => {
+    state.food.date = r.dataset.iso
+    renderFood(root)
+  })
+}
+
+function renderMealSections(root) {
+  const meals = state.food.meals
+  const sections = ['breakfast','lunch','dinner','snack']
+  const wrap = root.querySelector('#fd-meals')
+  wrap.innerHTML = ''
+  sections.forEach(sec => {
+    const mealsInSec = meals.filter(m => m.section === sec)
+    const secKcal = mealsInSec.reduce((a,m) => a + Number(m.total_calories || 0), 0)
+    wrap.insertAdjacentHTML('beforeend', `
+      <div style="font-size:11px;color:var(--food-mid);font-weight:500;text-transform:uppercase;letter-spacing:0.5px;margin:14px 0 8px;">${sec.charAt(0).toUpperCase()+sec.slice(1)}${mealsInSec.length ? ` · ${Math.round(secKcal)} kcal` : ''}</div>
+    `)
+    if (!mealsInSec.length) {
+      wrap.insertAdjacentHTML('beforeend', `
+        <div style="padding:12px;border:0.5px dashed var(--food-border);border-radius:10px;text-align:center;color:var(--food-mid);font-size:13px;cursor:pointer;" onclick="window.__addMealSection('${sec}')"><i class="ti ti-plus"></i> Add meal</div>`)
+    } else {
+      mealsInSec.forEach(m => {
+        wrap.insertAdjacentHTML('beforeend', `
+          <div class="meal-card" data-id="${m.id}" style="padding:12px;border:0.5px solid var(--food-border);background:var(--food-bg);border-radius:10px;margin-bottom:8px;cursor:pointer;">
+            <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px;">
+              <span style="font-size:14px;font-weight:500;color:var(--food-dark);">${esc(m.name || (m.meal_items?.map(i=>i.name).join(', ') || 'Meal'))}</span>
+              <span style="font-size:12px;color:var(--food-mid);font-weight:500;">${Math.round(Number(m.total_calories))} kcal</span>
+            </div>
+            <div style="display:flex;gap:10px;font-size:11px;">
+              <span style="color:#991B1B;">P ${Math.round(m.total_protein_g)}g</span>
+              <span style="color:#1E40AF;">C ${Math.round(m.total_carbs_g)}g</span>
+              <span style="color:#854D0E;">F ${Math.round(m.total_fat_g)}g</span>
+              <span style="color:var(--fiber);">Fi ${Math.round(m.total_fiber_g)}g</span>
+            </div>
+          </div>`)
+      })
+    }
+  })
+  window.__addMealSection = (sec) => openMealModal(root, { section: sec })
+  wrap.querySelectorAll('.meal-card').forEach(c => c.onclick = () => {
+    const m = meals.find(x => x.id === c.dataset.id)
+    openMealModal(root, { meal: m })
+  })
+}
+
+function openMealModal(root, { meal, section } = {}) {
+  const editing = !!meal
+  const sec = meal?.section || section || 'breakfast'
+  const items = editing
+    ? [...(meal.meal_items || [])].map(i => ({
+        name: i.name, grams: Number(i.grams),
+        calories: Number(i.calories), protein: Number(i.protein_g),
+        carbs: Number(i.carbs_g), fat: Number(i.fat_g), fiber: Number(i.fiber_g),
+      }))
+    : [{ name: '', grams: 0, calories: 0, protein: 0, carbs: 0, fat: 0, fiber: 0 }]
+
+  const initialDate = meal?.logged_on || state.food.date
+  const st = { section: sec, items, date: initialDate }
+
+  const render = () => {
+    const sums = st.items.reduce((a,it) => ({
+      kcal: a.kcal + it.calories, p: a.p + it.protein,
+      c: a.c + it.carbs, f: a.f + it.fat, fi: a.fi + it.fiber,
+      g: a.g + it.grams,
+    }), { kcal:0,p:0,c:0,f:0,fi:0,g:0 })
+
+    openModal(`
+      <div class="modal-header">
+        <div class="modal-close" onclick="window.__closeModal()"><i class="ti ti-x"></i></div>
+        <div class="modal-title">${editing ? 'Edit meal' : 'Add meal'}</div>
+        ${editing ? `<i class="ti ti-trash" style="font-size:18px;color:var(--gym);cursor:pointer;" onclick="window.__delMeal()"></i>` : '<div style="width:20px"></div>'}
+      </div>
+      <div class="modal-body">
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px;">
+          <div>
+            <div style="font-size:12px;font-weight:500;color:var(--text-secondary);margin-bottom:6px;">Section</div>
+            <select class="form-input" id="mm-section" style="padding:9px 12px;font-size:14px;">
+              ${['breakfast','lunch','dinner','snack'].map(s => `<option value="${s}" ${s===st.section?'selected':''}>${s.charAt(0).toUpperCase()+s.slice(1)}</option>`).join('')}
+            </select>
+          </div>
+          <div>
+            <div style="font-size:12px;font-weight:500;color:var(--text-secondary);margin-bottom:6px;">Date</div>
+            <input class="form-input" type="date" id="mm-date" value="${st.date}" max="${todayISO()}" style="padding:9px 12px;font-size:14px;" />
+          </div>
+        </div>
+
+        <div style="font-size:12px;font-weight:500;color:var(--text-secondary);margin-bottom:8px;">Foods</div>
+        <div id="mm-items"></div>
+
+        <button type="button" id="mm-addfood" style="width:100%;padding:10px;font-size:13px;border:0.5px dashed var(--food-border);color:var(--food-mid);background:transparent;border-radius:10px;margin-top:4px;"><i class="ti ti-plus"></i> Add food</button>
+
+        <button type="button" id="mm-ai" style="width:100%;padding:12px;font-size:14px;font-weight:500;background:var(--food-dark);color:white;border-radius:10px;margin-top:10px;display:flex;align-items:center;justify-content:center;gap:6px;"><i class="ti ti-sparkles" style="font-size:16px;"></i>Analyze with AI</button>
+
+        <div id="mm-totals" style="margin-top:16px;padding:12px;background:var(--food-bg);border-radius:10px;">
+          <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px;"><span style="font-size:13px;font-weight:500;color:var(--food-dark);">Total · ${Math.round(sums.g)}g</span><span style="font-size:16px;font-weight:500;color:var(--food-dark);">${Math.round(sums.kcal)} kcal</span></div>
+          <div style="display:flex;gap:10px;font-size:12px;color:var(--food-mid);">
+            <span style="color:#991B1B;">P ${Math.round(sums.p)}g</span>
+            <span style="color:#1E40AF;">C ${Math.round(sums.c)}g</span>
+            <span style="color:#854D0E;">F ${Math.round(sums.f)}g</span>
+            <span style="color:var(--fiber);">Fi ${Math.round(sums.fi)}g</span>
+          </div>
+        </div>
+
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" onclick="window.__closeModal()">Cancel</button>
+        <button class="btn-save food" id="mm-save">${editing ? 'Save changes' : 'Save meal'}</button>
+      </div>`)
+
+    const itemsWrap = document.getElementById('mm-items')
+    const renderItems = () => {
+      const numVal = v => (v && v !== 0) ? v : ''
+      itemsWrap.innerHTML = st.items.map((it,i) => `
+        <div style="padding:10px;border:0.5px solid var(--border);border-radius:10px;margin-bottom:8px;">
+          <div style="display:grid;grid-template-columns:1fr 96px 32px;gap:6px;align-items:center;margin-bottom:8px;">
+            <div class="field-inline" style="padding:8px 10px;"><input type="text" data-i="${i}" data-f="name" value="${esc(it.name)}" placeholder="Food name" /></div>
+            <div class="field-inline" style="padding:8px 10px;overflow:hidden;"><input type="number" data-i="${i}" data-f="grams" value="${numVal(it.grams)}" placeholder="0" style="min-width:0;text-align:right;" /><span class="field-suffix" style="font-size:12px;flex-shrink:0;">g</span></div>
+            <button data-del="${i}" style="padding:6px;color:var(--text-muted);"><i class="ti ti-trash"></i></button>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:5px;">
+            <div><div style="font-size:10px;color:var(--text-muted);margin-bottom:2px;text-align:center;">kcal</div><input type="number" data-i="${i}" data-f="calories" value="${numVal(it.calories)}" placeholder="0" style="width:100%;padding:6px;border:0.5px solid var(--border);border-radius:6px;font-size:12px;text-align:center;" /></div>
+            <div><div style="font-size:10px;color:#991B1B;margin-bottom:2px;text-align:center;font-weight:500;">P</div><input type="number" data-i="${i}" data-f="protein" value="${numVal(it.protein)}" placeholder="0" style="width:100%;padding:6px;border:0.5px solid var(--border);border-radius:6px;font-size:12px;text-align:center;" /></div>
+            <div><div style="font-size:10px;color:#1E40AF;margin-bottom:2px;text-align:center;font-weight:500;">C</div><input type="number" data-i="${i}" data-f="carbs" value="${numVal(it.carbs)}" placeholder="0" style="width:100%;padding:6px;border:0.5px solid var(--border);border-radius:6px;font-size:12px;text-align:center;" /></div>
+            <div><div style="font-size:10px;color:#854D0E;margin-bottom:2px;text-align:center;font-weight:500;">F</div><input type="number" data-i="${i}" data-f="fat" value="${numVal(it.fat)}" placeholder="0" style="width:100%;padding:6px;border:0.5px solid var(--border);border-radius:6px;font-size:12px;text-align:center;" /></div>
+            <div><div style="font-size:10px;color:var(--fiber);margin-bottom:2px;text-align:center;font-weight:500;">Fi</div><input type="number" data-i="${i}" data-f="fiber" value="${numVal(it.fiber)}" placeholder="0" style="width:100%;padding:6px;border:0.5px solid var(--border);border-radius:6px;font-size:12px;text-align:center;" /></div>
+          </div>
+        </div>`).join('')
+      itemsWrap.querySelectorAll('input').forEach(inp => inp.oninput = () => {
+        const i = Number(inp.dataset.i); const f = inp.dataset.f
+        st.items[i][f] = f === 'name' ? inp.value : (parseFloat(inp.value) || 0)
+        if (f !== 'name') updateTotals()
+      })
+      itemsWrap.querySelectorAll('[data-del]').forEach(b => b.onclick = () => {
+        if (st.items.length <= 1) return toast('Need at least 1 item', true)
+        st.items.splice(Number(b.dataset.del), 1)
+        render()
+      })
+    }
+    const updateTotals = () => {
+      // re-render just the totals block for speed
+      const s2 = st.items.reduce((a,it) => ({
+        kcal: a.kcal + it.calories, p: a.p + it.protein,
+        c: a.c + it.carbs, f: a.f + it.fat, fi: a.fi + it.fiber, g: a.g + it.grams,
+      }), { kcal:0,p:0,c:0,f:0,fi:0,g:0 })
+      const totWrap = document.getElementById('mm-totals')
+      if (totWrap) totWrap.innerHTML = `
+        <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px;"><span style="font-size:13px;font-weight:500;color:var(--food-dark);">Total · ${Math.round(s2.g)}g</span><span style="font-size:16px;font-weight:500;color:var(--food-dark);">${Math.round(s2.kcal)} kcal</span></div>
+        <div style="display:flex;gap:10px;font-size:12px;color:var(--food-mid);">
+          <span style="color:#991B1B;">P ${Math.round(s2.p)}g</span>
+          <span style="color:#1E40AF;">C ${Math.round(s2.c)}g</span>
+          <span style="color:#854D0E;">F ${Math.round(s2.f)}g</span>
+          <span style="color:var(--fiber);">Fi ${Math.round(s2.fi)}g</span>
+        </div>`
+    }
+    renderItems()
+
+    document.getElementById('mm-section').onchange = e => { st.section = e.target.value }
+    document.getElementById('mm-date').onchange = e => { st.date = e.target.value }
+    document.getElementById('mm-addfood').onclick = () => {
+      st.items.push({ name:'', grams:0, calories:0, protein:0, carbs:0, fat:0, fiber:0 })
+      render()
+    }
+    document.getElementById('mm-ai').onclick = async () => {
+      const named = st.items.filter(i => i.name.trim() && i.grams > 0)
+      if (!named.length) return toast('Add food names and weights first', true)
+      const btn = document.getElementById('mm-ai')
+      const origHTML = btn.innerHTML
+      btn.disabled = true; btn.style.opacity = '0.7'
+      btn.innerHTML = '<i class="ti ti-loader"></i> Analyzing…'
+      try {
+        const { data: { session } } = await sb.auth.getSession()
+        const res = await fetch(`${SUPABASE_URL}/functions/v1/analyze-meal`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${session.access_token}`,
+            'Content-Type': 'application/json',
+            'apikey': SUPABASE_KEY,
+          },
+          body: JSON.stringify({ items: named.map(i => ({ name: i.name.trim(), grams: Number(i.grams) })) }),
+        })
+        const body = await res.json()
+        if (!res.ok) throw new Error(body.error || 'AI request failed')
+        const returned = body.items || []
+        // Match returned items back to st.items by index (in same order)
+        let idx = 0
+        st.items.forEach(it => {
+          if (!it.name.trim() || it.grams <= 0) return
+          const r = returned[idx++]
+          if (r) {
+            const r1 = v => Math.round((Number(v) || 0) * 10) / 10
+            it.calories = r1(r.calories)
+            it.protein = r1(r.protein_g)
+            it.carbs = r1(r.carbs_g)
+            it.fat = r1(r.fat_g)
+            it.fiber = r1(r.fiber_g)
+          }
+        })
+        toast('AI analysis complete')
+        render()
+      } catch (e) {
+        toast(e.message, true)
+        btn.disabled = false; btn.style.opacity = ''
+        btn.innerHTML = origHTML
+      }
+    }
+    document.getElementById('mm-save').onclick = async () => {
+      const validItems = st.items.filter(i => i.name.trim())
+      if (!validItems.length) return toast('Add at least one food', true)
+      const totals = validItems.reduce((a,i) => ({
+        kcal: a.kcal + i.calories, p: a.p + i.protein,
+        c: a.c + i.carbs, f: a.f + i.fat, fi: a.fi + i.fiber, g: a.g + i.grams,
+      }), { kcal:0,p:0,c:0,f:0,fi:0,g:0 })
+
+      let mealId
+      if (editing) {
+        await sb.from('meals').update({
+          logged_on: st.date, section: st.section,
+          total_calories: totals.kcal, total_protein_g: totals.p,
+          total_carbs_g: totals.c, total_fat_g: totals.f, total_fiber_g: totals.fi,
+          total_weight_g: totals.g, name: validItems.map(i=>i.name).join(', '),
+        }).eq('id', meal.id)
+        await sb.from('meal_items').delete().eq('meal_id', meal.id)
+        mealId = meal.id
+      } else {
+        const { data: newM, error } = await sb.from('meals').insert({
+          user_id: state.user.id, logged_on: st.date, section: st.section,
+          name: validItems.map(i=>i.name).join(', '),
+          total_calories: totals.kcal, total_protein_g: totals.p,
+          total_carbs_g: totals.c, total_fat_g: totals.f, total_fiber_g: totals.fi,
+          total_weight_g: totals.g,
+        }).select('id').single()
+        if (error) return toast(error.message, true)
+        mealId = newM.id
+      }
+      await sb.from('meal_items').insert(validItems.map((i,idx) => ({
+        meal_id: mealId, name: i.name.trim(), grams: i.grams,
+        calories: i.calories, protein_g: i.protein, carbs_g: i.carbs,
+        fat_g: i.fat, fiber_g: i.fiber, sort_order: idx,
+      })))
+      toast(editing ? 'Meal updated' : 'Meal saved')
+      closeModal()
+      // Navigate food page to the saved date so the user sees the result
+      state.food.date = st.date
+      renderFood(root)
+    }
+    window.__delMeal = async () => {
+      if (!confirm('Delete this meal?')) return
+      await sb.from('meals').delete().eq('id', meal.id)
+      toast('Deleted')
+      closeModal()
+      renderFood(root)
+    }
+  }
+  render()
+}
+async function renderWeight(root) {
+  const unit = state.weight.unit
+  const selDate = state.weight.date
+  const isTodayW = selDate === todayISO()
+  const centerHTML = `<i class="ti ti-chevron-left" id="wd-prev"></i><span>${isTodayW ? 'Today' : fmtLongDate(selDate)}</span><i class="ti ti-chevron-right" id="wd-next" style="${isTodayW ? 'opacity:0.3;pointer-events:none;' : ''}"></i>`
+  root.innerHTML = pageHeader('Weight', { centerHTML })
+
+  root.querySelector('#wd-prev').onclick = () => { const d = new Date(selDate); d.setDate(d.getDate()-1); state.weight.date = d.toISOString().slice(0,10); renderWeight(root) }
+  root.querySelector('#wd-next').onclick = () => { const d = new Date(selDate); d.setDate(d.getDate()+1); const iso = d.toISOString().slice(0,10); if (iso > todayISO()) return; state.weight.date = iso; renderWeight(root) }
+
+  // Unit toggle moved to below the header since date is now in the center
+  root.insertAdjacentHTML('beforeend', `
+    <div style="padding:12px 16px 4px;display:flex;justify-content:flex-end;">
+      <div style="display:inline-flex;background:var(--surface-alt);border-radius:999px;padding:2px;font-size:11px;">
+        <span data-unit="kg" class="wu-pill" style="padding:4px 14px;border-radius:999px;cursor:pointer;${unit==='kg'?'background:var(--weight);color:white;font-weight:500;':''}">kg</span>
+        <span data-unit="lbs" class="wu-pill" style="padding:4px 14px;border-radius:999px;cursor:pointer;${unit==='lbs'?'background:var(--weight);color:white;font-weight:500;':''}">lbs</span>
+      </div>
+    </div>`)
+
+  root.querySelectorAll('.wu-pill').forEach(p => p.onclick = async () => {
+    const u = p.dataset.unit
+    if (u === state.weight.unit) return
+    state.weight.unit = u
+    if (state.profile) {
+      await sb.from('profiles').update({ weight_unit: u }).eq('id', state.user.id)
+      state.profile.weight_unit = u
+    }
+    renderWeight(root)
+  })
+
+  // Fetch weight logs
+  const range = state.weight.range
+  const start = new Date(); start.setDate(start.getDate() - range)
+  const startISO = start.toISOString().slice(0,10)
+  const { data: logs, error } = await sb.from('weight_logs').select('*').gte('logged_on', startISO).order('logged_on', { ascending: true })
+  if (error) throw error
+  state.weight.logs = logs || []
+
+  // Also fetch latest overall for delta comparison
+  const { data: latestAny } = await sb.from('weight_logs').select('*').order('logged_on', { ascending: false }).limit(1)
+  const latest = latestAny?.[0]
+  // Log for the currently selected date (may be today or a past date)
+  const { data: dayLogAny } = await sb.from('weight_logs').select('*').eq('logged_on', selDate).limit(1)
+  const dayLog = dayLogAny?.[0]
+  const displayLog = dayLog || latest
+
+  // Delta vs 7 days ago
+  let delta = null
+  if (latest && logs && logs.length > 1) {
+    const wkAgo = new Date(); wkAgo.setDate(wkAgo.getDate() - 7)
+    const wkAgoISO = wkAgo.toISOString().slice(0,10)
+    const past = [...logs].reverse().find(l => l.logged_on <= wkAgoISO) || logs[0]
+    if (past) delta = latest.weight_kg - past.weight_kg
+  }
+
+  const bigNum = displayLog ? dispWeight(displayLog.weight_kg, unit) : '—'
+  const showAsLatestFallback = !dayLog && !!latest
+  const deltaLabel = delta === null ? '' :
+    Math.abs(delta) < 0.05 ? 'No change this week' :
+    delta < 0 ? `▼ ${Math.abs(delta).toFixed(1)} ${unit} this week` :
+                `▲ ${delta.toFixed(1)} ${unit} this week`
+  const deltaColor = delta === null ? 'var(--text-muted)' : (delta < 0 ? 'var(--food)' : 'var(--gym)')
+
+  const logLabel = isTodayW
+    ? (dayLog ? "Today's logged weight" : "Log this morning's weight")
+    : (dayLog ? `Logged weight for ${fmtLongDate(selDate)}` : `Log weight for ${fmtLongDate(selDate)}`)
+
+  root.insertAdjacentHTML('beforeend', `
+    <div style="padding:16px 16px 8px; text-align:center; background:linear-gradient(180deg, var(--weight-bg) 0%, transparent 100%);">
+      <div style="font-size:52px;font-weight:500;line-height:1;color:var(--weight-dark);">${bigNum} <span style="font-size:18px;color:var(--weight);font-weight:400;">${unit}</span></div>
+      ${!isTodayW && !dayLog && latest ? `<div style="font-size:11px;color:var(--text-muted);margin-top:6px;">No log on this date · showing latest</div>` : ''}
+      ${isTodayW && deltaLabel ? `<div style="display:inline-flex;align-items:center;gap:4px;margin-top:10px;padding:4px 12px;background:var(--weight-bg);color:${deltaColor};border-radius:999px;font-size:12px;font-weight:500;">${deltaLabel}</div>` : ''}
+    </div>
+
+    <div style="padding:16px;">
+      <div style="font-size:12px;font-weight:500;color:var(--weight-mid);margin-bottom:6px;">${logLabel}</div>
+      <form id="wf" style="display:flex;gap:8px;">
+        <div class="field-inline" style="flex:1; border-color: var(--weight-border); background: var(--weight-bg);">
+          <input type="number" step="0.1" id="w-in" value="${dayLog ? dispWeight(dayLog.weight_kg, unit) : ''}" placeholder="${unit==='kg'?'74.2':'163.5'}" style="color:var(--weight-dark);" />
+          <span class="field-suffix" style="color:var(--weight);">${unit}</span>
+        </div>
+        <button type="submit" class="btn-save weight" style="padding:10px 24px;">${dayLog ? 'Update' : 'Log'}</button>
+        ${dayLog ? `<button type="button" id="w-del" class="btn-danger" title="Delete this entry"><i class="ti ti-trash"></i></button>` : ''}
+      </form>
+    </div>
+
+    <div style="padding: 4px 14px 20px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:0 2px 10px;">
+        <div style="font-size:13px;font-weight:500;">Weight trend</div>
+        <div class="pill wt-range" style="border-color:var(--weight-border);color:var(--weight-dark);"><i class="ti ti-calendar" style="color:var(--weight);"></i><span style="font-weight:500;" id="wt-range-label">${rangeLabel(range)}</span><i class="ti ti-chevron-down" style="color:var(--weight);"></i></div>
+      </div>
+      <div id="wt-chart"></div>
+      <div class="chart-info weight" id="wt-info"></div>
+    </div>
+  `)
+
+  root.querySelector('#wf').onsubmit = async e => {
+    e.preventDefault()
+    const val = parseFloat(root.querySelector('#w-in').value)
+    if (!val || val <= 0) return toast('Enter a valid weight', true)
+    const kg = unit === 'lbs' ? lbsToKg(val) : val
+    const { error } = await sb.from('weight_logs').upsert({
+      user_id: state.user.id, logged_on: selDate, weight_kg: kg
+    }, { onConflict: 'user_id,logged_on' })
+    if (error) return toast(error.message, true)
+    toast(dayLog ? 'Weight updated' : 'Weight logged')
+    renderWeight(root)
+  }
+  const delBtn = root.querySelector('#w-del')
+  if (delBtn) delBtn.onclick = async () => {
+    if (!confirm('Delete this weigh-in?')) return
+    await sb.from('weight_logs').delete().eq('id', dayLog.id)
+    toast('Deleted')
+    renderWeight(root)
+  }
+
+  root.querySelector('.wt-range').onclick = () => openRangeMenu('weight', root)
+
+  drawWeightChart(root)
+}
+
+function rangeLabel(r) { return r === 7 ? 'Last 7 days' : r === 30 ? 'Last 30 days' : 'Last year' }
+
+function openRangeMenu(section, root) {
+  const opts = [{v:7,l:'Last 7 days'},{v:30,l:'Last 30 days'},{v:365,l:'Last year'}]
+  const cur = state[section].range
+  openModal(`
+    <div class="modal-header">
+      <div class="modal-close" onclick="window.__closeModal()"><i class="ti ti-x"></i></div>
+      <div class="modal-title">Date range</div>
+      <div style="width:20px"></div>
+    </div>
+    <div class="modal-body">
+      ${opts.map(o => `<div class="range-opt" data-v="${o.v}" style="padding:14px;border-radius:10px;display:flex;justify-content:space-between;align-items:center;cursor:pointer;${o.v===cur?'background:var(--surface-alt);':''}"><span style="font-weight:500;">${o.l}</span>${o.v===cur?'<i class="ti ti-check" style="color:var(--food);"></i>':''}</div>`).join('')}
+    </div>
+  `)
+  document.querySelectorAll('.range-opt').forEach(o => o.onclick = () => {
+    state[section].range = Number(o.dataset.v)
+    closeModal()
+    if (section === 'weight') renderWeight(root)
+    else if (section === 'food') renderFood(root)
+    else if (section === 'gym') renderGym(root)
+  })
+}
+
+function drawWeightChart(root) {
+  const container = root.querySelector('#wt-chart')
+  const info = root.querySelector('#wt-info')
+  const logs = state.weight.logs
+  const unit = state.weight.unit
+  if (!logs.length) {
+    container.innerHTML = '<div class="empty"><i class="ti ti-chart-line"></i>No weight logs in this range yet</div>'
+    return
+  }
+  // Fill missing days is unnecessary — plot actual logs
+  const pts = logs.map(l => ({ x: l.logged_on, y: l.weight_kg, raw: l }))
+  const ys = pts.map(p => p.y)
+  const yMin = Math.min(...ys) - 0.5
+  const yMax = Math.max(...ys) + 0.5
+  const yRange = Math.max(0.1, yMax - yMin)
+  const W = 320, H = 260, PAD_L = 8, PAD_R = 40, PAD_T = 20, PAD_B = 40
+  const plotW = W - PAD_L - PAD_R, plotH = H - PAD_T - PAD_B
+  const n = pts.length
+  const xAt = i => n === 1 ? W/2 : PAD_L + (i / (n-1)) * plotW
+  const yAt = v => PAD_T + (1 - (v - yMin) / yRange) * plotH
+
+  const gridYs = [yMin, yMin + yRange/2, yMax]
+  const gridLines = gridYs.map(v => `<line x1="0" y1="${yAt(v)}" x2="${W-PAD_R+4}" y2="${yAt(v)}" stroke="var(--border)" stroke-width="0.5" stroke-dasharray="2,3"/><text x="${W-2}" y="${yAt(v)+3}" font-size="11" fill="var(--text-muted)" text-anchor="end">${dispWeight(v, unit)}</text>`).join('')
+
+  const poly = pts.map((p,i) => `${xAt(i)},${yAt(p.y)}`).join(' ')
+  const dots = pts.map((p,i) => `<circle data-i="${i}" cx="${xAt(i)}" cy="${yAt(p.y)}" r="6" fill="var(--weight)" stroke="white" stroke-width="2" style="cursor:pointer;"/>`).join('')
+
+  // X labels: first, middle, last
+  const xLabels = []
+  xLabels.push({ i: 0, l: fmtDate(pts[0].x) })
+  if (n > 2) xLabels.push({ i: Math.floor(n/2), l: fmtDate(pts[Math.floor(n/2)].x) })
+  if (n > 1) xLabels.push({ i: n-1, l: fmtDate(pts[n-1].x, {smart:true}) })
+  const xLabelHTML = xLabels.map(l => `<text x="${xAt(l.i)}" y="${H-15}" font-size="11" fill="var(--text-muted)" text-anchor="${l.i===0?'start':l.i===n-1?'end':'middle'}">${l.l}</text>`).join('')
+
+  container.innerHTML = `
+    <svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto;display:block;">
+      ${gridLines}
+      <line x1="0" y1="${H-PAD_B}" x2="${W-PAD_R+4}" y2="${H-PAD_B}" stroke="var(--border)" stroke-width="0.7"/>
+      <polyline points="${poly}" fill="none" stroke="var(--weight)" stroke-width="2.5"/>
+      ${dots}
+      ${xLabelHTML}
+    </svg>
+  `
+
+  container.querySelectorAll('circle[data-i]').forEach(c => c.onclick = () => {
+    const p = pts[Number(c.dataset.i)]
+    info.classList.add('show')
+    info.innerHTML = `
+      <div class="ci-title">
+        <span>${fmtDate(p.x, {smart:true})} · ${dispWeight(p.y, unit)} ${unit}</span>
+        <i class="ti ti-x" style="cursor:pointer;" id="ci-close"></i>
+      </div>
+      <div style="display:flex;gap:6px;margin-top:8px;">
+        <div class="field-inline" style="flex:1;padding:6px 10px;background:var(--surface);border-color:var(--weight-border);">
+          <input type="number" step="0.1" id="ci-edit" value="${dispWeight(p.y, unit)}" style="font-size:13px;color:var(--weight-dark);"/>
+          <span class="field-suffix" style="color:var(--weight);">${unit}</span>
+        </div>
+        <button id="ci-save" style="padding:6px 14px;font-size:12px;background:var(--weight);color:white;border-radius:8px;font-weight:500;">Save</button>
+        <button id="ci-del" style="padding:6px 10px;font-size:12px;color:var(--gym);background:var(--surface);border:0.5px solid var(--border);border-radius:8px;"><i class="ti ti-trash"></i></button>
+      </div>`
+    info.querySelector('#ci-close').onclick = () => info.classList.remove('show')
+    info.querySelector('#ci-save').onclick = async () => {
+      const v = parseFloat(info.querySelector('#ci-edit').value)
+      if (!v) return
+      const kg = unit === 'lbs' ? lbsToKg(v) : v
+      await sb.from('weight_logs').update({ weight_kg: kg }).eq('id', p.raw.id)
+      toast('Updated')
+      info.classList.remove('show')
+      renderWeight(root)
+    }
+    info.querySelector('#ci-del').onclick = async () => {
+      if (!confirm('Delete this weigh-in?')) return
+      await sb.from('weight_logs').delete().eq('id', p.raw.id)
+      toast('Deleted')
+      info.classList.remove('show')
+      renderWeight(root)
+    }
+  })
+}
+async function renderGym(root) {
+  const selDate = state.gym.date
+  const isTodayG = selDate === todayISO()
+  const centerHTML = `<i class="ti ti-chevron-left" id="gd-prev"></i><span>${isTodayG ? 'Today' : fmtLongDate(selDate)}</span><i class="ti ti-chevron-right" id="gd-next" style="${isTodayG ? 'opacity:0.3;pointer-events:none;' : ''}"></i>`
+  root.innerHTML = pageHeader('Gym', { centerHTML })
+  root.querySelector('#gd-prev').onclick = () => { const d = new Date(selDate); d.setDate(d.getDate()-1); state.gym.date = d.toISOString().slice(0,10); renderGym(root) }
+  root.querySelector('#gd-next').onclick = () => { const d = new Date(selDate); d.setDate(d.getDate()+1); const iso = d.toISOString().slice(0,10); if (iso > todayISO()) return; state.gym.date = iso; renderGym(root) }
+
+  root.insertAdjacentHTML('beforeend', `
+    <div style="padding:10px 16px 4px;display:flex;justify-content:flex-end;">
+      <i class="ti ti-settings" style="font-size:20px;color:var(--gym);cursor:pointer;" id="gym-settings"></i>
+    </div>`)
+  root.querySelector('#gym-settings').onclick = () => openGroupsManager(root)
+
+  // Load groups + exercises
+  const [{ data: groups }, { data: exercises }] = await Promise.all([
+    sb.from('muscle_groups').select('*').order('sort_order'),
+    sb.from('exercises').select('*').order('sort_order'),
+  ])
+  state.gym.groups = groups || []
+  state.gym.exercises = {}
+  ;(exercises || []).forEach(ex => {
+    (state.gym.exercises[ex.muscle_group_id] ||= []).push(ex)
+  })
+
+  if (!state.gym.groups.length) {
+    root.insertAdjacentHTML('beforeend', `
+      <div class="empty" style="padding-top:60px;"><i class="ti ti-barbell"></i>No muscle groups yet<br><br>
+        <button class="btn-save gym" style="max-width:200px;margin:0 auto;padding:12px 20px;" onclick="window.__addGroup()">Add first group</button>
+      </div>`)
+    window.__addGroup = () => addGroupPrompt(root)
+    return
+  }
+
+  if (!state.gym.activeGroup || !state.gym.groups.find(g => g.id === state.gym.activeGroup)) {
+    state.gym.activeGroup = state.gym.groups[0].id
+  }
+
+  // Load latest sessions + max weights for all exercises in the active group
+  const activeExercises = state.gym.exercises[state.gym.activeGroup] || []
+  const exIds = activeExercises.map(e => e.id)
+  let prs = {}
+  if (exIds.length) {
+    const { data: sessions } = await sb.from('workout_sessions')
+      .select('id,exercise_id,performed_on,max_weight_kg,is_pr,workout_sets(reps,weight_kg,set_number)')
+      .in('exercise_id', exIds)
+      .order('performed_on', { ascending: false })
+    ;(sessions || []).forEach(s => {
+      if (!prs[s.exercise_id]) {
+        // Latest session (most recent)
+        const heaviestSet = (s.workout_sets || []).reduce((a,b) => Number(b.weight_kg) > Number(a?.weight_kg || 0) ? b : a, null)
+        prs[s.exercise_id] = {
+          latest: s,
+          heaviestSet,
+          setsCount: (s.workout_sets || []).length,
+        }
+      }
+    })
+  }
+  state.gym.prs = prs
+
+  // Tabs
+  const tabsHTML = state.gym.groups.map(g => `
+    <span class="gym-tab" data-id="${g.id}" style="padding:7px 16px;border-radius:999px;font-size:13px;white-space:nowrap;cursor:pointer;${g.id === state.gym.activeGroup ? 'background:var(--gym);color:white;font-weight:500;' : 'color:var(--gym-dark);'}">${esc(g.name)}</span>
+  `).join('')
+
+  root.insertAdjacentHTML('beforeend', `
+    <div style="display:flex;gap:4px;padding:10px 12px;border-bottom:0.5px solid var(--border);overflow-x:auto;background:var(--gym-bg);">
+      ${tabsHTML}
+      <span class="gym-tab-add" style="padding:7px 12px;border-radius:999px;font-size:13px;color:var(--gym);cursor:pointer;"><i class="ti ti-plus"></i></span>
+    </div>
+    <div style="padding: 14px 12px;" id="gym-body"></div>
+  `)
+
+  root.querySelectorAll('.gym-tab').forEach(t => t.onclick = () => {
+    state.gym.activeGroup = t.dataset.id
+    state.gym.chartExercise = null
+    renderGym(root)
+  })
+  root.querySelector('.gym-tab-add').onclick = () => addGroupPrompt(root)
+
+  const body = root.querySelector('#gym-body')
+
+  if (!activeExercises.length) {
+    body.innerHTML = `
+      <div class="empty"><i class="ti ti-barbell"></i>No exercises in this group yet</div>
+      <button class="btn-save gym" style="width:100%;padding:14px;" onclick="window.__addExercise()"><i class="ti ti-plus" style="margin-right:6px;"></i>Add exercise</button>`
+    window.__addExercise = () => addExercisePrompt(root)
+    return
+  }
+
+  // Exercise cards
+  activeExercises.forEach(ex => {
+    const pr = prs[ex.id]
+    const latest = pr?.latest
+    const heaviest = pr?.heaviestSet
+    const badge = latest?.is_pr ? '<span class="chip chip-pr-red"><i class="ti ti-arrow-up"></i> PR</span>' : ''
+    const line = heaviest
+      ? `${pr.setsCount} × ${heaviest.reps} <span style="font-weight:500;color:var(--gym-dark);">(${dispWeight(Number(heaviest.weight_kg), state.weight.unit)}${state.weight.unit})</span>`
+      : '<span style="color:var(--text-muted);font-size:14px;">No sessions yet</span>'
+    const dateStr = latest ? `Last logged ${fmtDate(latest.performed_on, {smart:true})}` : ''
+    body.insertAdjacentHTML('beforeend', `
+      <div class="ex-card" data-id="${ex.id}" style="padding:14px 16px;border:0.5px solid var(--gym-border);background:var(--gym-bg);border-radius:12px;margin-bottom:10px;cursor:pointer;">
+        <div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:6px;">
+          <span style="font-size:14px;color:var(--gym-mid);font-weight:500;">${esc(ex.name)}</span>
+          ${badge}
+        </div>
+        <div style="font-size:20px;color:var(--gym-mid);">${line}</div>
+        ${dateStr ? `<div style="font-size:11px;color:var(--gym-mid);margin-top:4px;opacity:0.8;">${dateStr}</div>` : ''}
+      </div>`)
+  })
+  body.querySelectorAll('.ex-card').forEach(c => c.onclick = () => {
+    state.gym.chartExercise = c.dataset.id
+    renderGym(root)
+  })
+
+  body.insertAdjacentHTML('beforeend', `
+    <button class="btn-save gym" style="width:100%;padding:14px;margin-top:12px;" onclick="window.__logWorkout()"><i class="ti ti-plus" style="margin-right:6px;"></i>${isTodayG ? 'Log workout' : `Log workout for ${fmtDate(selDate)}`}</button>
+    <button style="width:100%;padding:10px;margin-top:8px;border:0.5px dashed var(--gym-border);color:var(--gym);background:transparent;border-radius:10px;font-size:13px;" onclick="window.__addExercise()"><i class="ti ti-plus"></i> Add exercise</button>
+  `)
+  window.__logWorkout = () => openLogWorkoutModal(root, { defaultDate: selDate })
+  window.__addExercise = () => addExercisePrompt(root)
+
+  // Progression chart for selected exercise
+  const chartEx = state.gym.chartExercise ? activeExercises.find(e => e.id === state.gym.chartExercise) : activeExercises[0]
+  if (chartEx) await renderGymChart(root, chartEx)
+}
+
+async function renderGymChart(root, ex) {
+  const range = state.gym.range
+  const start = new Date(); start.setDate(start.getDate() - range)
+  const startISO = start.toISOString().slice(0,10)
+  const { data: sessions } = await sb.from('workout_sessions')
+    .select('id,performed_on,notes,max_weight_kg,workout_sets(reps,weight_kg,set_number)')
+    .eq('exercise_id', ex.id)
+    .gte('performed_on', startISO)
+    .order('performed_on', { ascending: true })
+  const pts = (sessions || []).filter(s => Number(s.max_weight_kg) > 0).map(s => ({
+    x: s.performed_on, y: Number(s.max_weight_kg), raw: s
+  }))
+  const unit = state.weight.unit
+
+  const container = document.createElement('div')
+  container.style.cssText = 'padding: 4px 14px 24px;'
+  container.innerHTML = `
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 4px 10px;">
+      <div style="font-size:13px;font-weight:500;">${esc(ex.name)} progression</div>
+      <div class="pill gm-range" style="border-color:var(--gym-border);color:var(--gym-dark);"><i class="ti ti-calendar" style="color:var(--gym);"></i><span style="font-weight:500;">${rangeLabel(range)}</span><i class="ti ti-chevron-down" style="color:var(--gym);"></i></div>
+    </div>
+    <div id="gm-chart"></div>
+    <div class="chart-info gym" id="gm-info"></div>`
+  root.appendChild(container)
+
+  container.querySelector('.gm-range').onclick = () => openRangeMenu('gym', root)
+
+  const chart = container.querySelector('#gm-chart')
+  const info = container.querySelector('#gm-info')
+  if (!pts.length) {
+    chart.innerHTML = '<div class="empty"><i class="ti ti-chart-line"></i>No sessions in this range</div>'
+    return
+  }
+
+  const ys = pts.map(p => p.y)
+  const yMin = Math.min(...ys) - 2
+  const yMax = Math.max(...ys) + 2
+  const yRange = Math.max(1, yMax - yMin)
+  const W = 320, H = 260, PAD_L = 8, PAD_R = 44, PAD_T = 20, PAD_B = 40
+  const plotW = W - PAD_L - PAD_R, plotH = H - PAD_T - PAD_B
+  const n = pts.length
+  const xAt = i => n === 1 ? W/2 : PAD_L + (i / (n-1)) * plotW
+  const yAt = v => PAD_T + (1 - (v - yMin) / yRange) * plotH
+
+  const gridYs = [yMin, yMin + yRange/2, yMax]
+  const gridLines = gridYs.map(v => `<line x1="0" y1="${yAt(v)}" x2="${W-PAD_R+4}" y2="${yAt(v)}" stroke="var(--border)" stroke-width="0.5" stroke-dasharray="2,3"/><text x="${W-2}" y="${yAt(v)+3}" font-size="11" fill="var(--text-muted)" text-anchor="end">${dispWeight(v, unit)}</text>`).join('')
+
+  const poly = pts.map((p,i) => `${xAt(i)},${yAt(p.y)}`).join(' ')
+  const dots = pts.map((p,i) => `<circle data-i="${i}" cx="${xAt(i)}" cy="${yAt(p.y)}" r="6" fill="var(--gym)" stroke="white" stroke-width="2" style="cursor:pointer;"/>`).join('')
+
+  const xLabels = []
+  xLabels.push({ i: 0, l: fmtDate(pts[0].x) })
+  if (n > 2) xLabels.push({ i: Math.floor(n/2), l: fmtDate(pts[Math.floor(n/2)].x) })
+  if (n > 1) xLabels.push({ i: n-1, l: fmtDate(pts[n-1].x, {smart:true}) })
+  const xLabelHTML = xLabels.map(l => `<text x="${xAt(l.i)}" y="${H-15}" font-size="11" fill="var(--text-muted)" text-anchor="${l.i===0?'start':l.i===n-1?'end':'middle'}">${l.l}</text>`).join('')
+
+  chart.innerHTML = `
+    <svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto;display:block;">
+      ${gridLines}
+      <line x1="0" y1="${H-PAD_B}" x2="${W-PAD_R+4}" y2="${H-PAD_B}" stroke="var(--border)" stroke-width="0.7"/>
+      <polyline points="${poly}" fill="none" stroke="var(--gym)" stroke-width="2.5"/>
+      ${dots}
+      ${xLabelHTML}
+    </svg>`
+
+  chart.querySelectorAll('circle[data-i]').forEach(c => c.onclick = () => {
+    const p = pts[Number(c.dataset.i)]
+    const sets = (p.raw.workout_sets || []).sort((a,b) => a.set_number - b.set_number)
+    const setLines = sets.map(s => `${s.reps} × ${dispWeight(Number(s.weight_kg), unit)}${unit}`).join(' · ')
+    info.classList.add('show')
+    info.innerHTML = `
+      <div class="ci-title">
+        <span>${fmtDate(p.x, {smart:true})} · ${esc(ex.name)}</span>
+        <i class="ti ti-x" style="cursor:pointer;" onclick="this.closest('.chart-info').classList.remove('show')"></i>
+      </div>
+      <div style="font-size:12px;margin-bottom:4px;">${esc(setLines)}</div>
+      ${p.raw.notes ? `<div style="font-size:11px;color:var(--gym-mid);font-style:italic;margin-bottom:6px;">"${esc(p.raw.notes)}"</div>` : ''}
+      <div style="display:flex;gap:6px;margin-top:8px;">
+        <button style="flex:1;padding:7px;font-size:12px;background:var(--surface);border-radius:8px;" onclick="window.__editSession('${p.raw.id}','${ex.id}')">Edit session</button>
+        <button style="padding:7px 12px;font-size:12px;color:var(--gym);background:var(--surface);border:0.5px solid var(--border);border-radius:8px;" onclick="window.__delSession('${p.raw.id}')"><i class="ti ti-trash"></i></button>
+      </div>`
+  })
+
+  window.__editSession = async (sid, exId) => {
+    const { data: s } = await sb.from('workout_sessions').select('*,workout_sets(*)').eq('id', sid).single()
+    openLogWorkoutModal(root, { session: s, exerciseId: exId })
+  }
+  window.__delSession = async sid => {
+    if (!confirm('Delete this workout session?')) return
+    await sb.from('workout_sessions').delete().eq('id', sid)
+    toast('Deleted')
+    renderGym(root)
+  }
+}
+
+function addGroupPrompt(root) {
+  openModal(`
+    <div class="modal-header">
+      <div class="modal-close" onclick="window.__closeModal()"><i class="ti ti-x"></i></div>
+      <div class="modal-title">Add muscle group</div>
+      <div style="width:20px"></div>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">Name</label>
+        <input class="form-input" id="ag-name" placeholder="Shoulders, Arms, Push, Pull…" autofocus />
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" onclick="window.__closeModal()">Cancel</button>
+      <button class="btn-save gym" onclick="window.__saveGroup()">Add group</button>
+    </div>`)
+  window.__saveGroup = async () => {
+    const name = document.getElementById('ag-name').value.trim()
+    if (!name) return toast('Enter a name', true)
+    const maxOrder = state.gym.groups.reduce((a,b)=>Math.max(a,b.sort_order||0),0)
+    const { error } = await sb.from('muscle_groups').insert({ user_id: state.user.id, name, sort_order: maxOrder+1 })
+    if (error) return toast(error.message, true)
+    closeModal()
+    renderGym(root)
+  }
+}
+
+function addExercisePrompt(root) {
+  openModal(`
+    <div class="modal-header">
+      <div class="modal-close" onclick="window.__closeModal()"><i class="ti ti-x"></i></div>
+      <div class="modal-title">Add exercise</div>
+      <div style="width:20px"></div>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">Name</label>
+        <input class="form-input" id="ae-name" placeholder="Dumbbell Fly, Skull Crusher…" autofocus />
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" onclick="window.__closeModal()">Cancel</button>
+      <button class="btn-save gym" onclick="window.__saveEx()">Add exercise</button>
+    </div>`)
+  window.__saveEx = async () => {
+    const name = document.getElementById('ae-name').value.trim()
+    if (!name) return toast('Enter a name', true)
+    const gid = state.gym.activeGroup
+    const list = state.gym.exercises[gid] || []
+    const maxOrder = list.reduce((a,b)=>Math.max(a,b.sort_order||0),0)
+    const { error } = await sb.from('exercises').insert({ user_id: state.user.id, muscle_group_id: gid, name, sort_order: maxOrder+1 })
+    if (error) return toast(error.message, true)
+    closeModal()
+    renderGym(root)
+  }
+}
+
+function openGroupsManager(root) {
+  const gs = state.gym.groups
+  openModal(`
+    <div class="modal-header">
+      <div class="modal-close" onclick="window.__closeModal()"><i class="ti ti-x"></i></div>
+      <div class="modal-title">Manage groups</div>
+      <div style="width:20px"></div>
+    </div>
+    <div class="modal-body">
+      <div style="font-size:12px;color:var(--text-muted);margin-bottom:12px;">Rename or delete muscle groups and exercises. Deleting a group also deletes its exercises and history.</div>
+      ${gs.map(g => {
+        const exs = state.gym.exercises[g.id] || []
+        return `
+        <div style="border:0.5px solid var(--border);border-radius:10px;padding:12px;margin-bottom:10px;">
+          <div style="display:flex;gap:6px;align-items:center;margin-bottom:8px;">
+            <input class="form-input gm-name" data-id="${g.id}" value="${esc(g.name)}" style="flex:1;padding:8px 12px;font-size:14px;font-weight:500;color:var(--gym-dark);" />
+            <button style="padding:8px;color:var(--gym);background:var(--surface);border:0.5px solid var(--border);border-radius:8px;" onclick="window.__delGroup('${g.id}')"><i class="ti ti-trash"></i></button>
+          </div>
+          ${exs.map(ex => `
+            <div style="display:flex;gap:6px;align-items:center;margin-top:6px;">
+              <input class="form-input em-name" data-id="${ex.id}" value="${esc(ex.name)}" style="flex:1;padding:6px 10px;font-size:13px;" />
+              <button style="padding:6px 8px;color:var(--gym);background:transparent;border:0.5px solid var(--border);border-radius:6px;" onclick="window.__delEx('${ex.id}')"><i class="ti ti-trash" style="font-size:14px;"></i></button>
+            </div>`).join('')}
+          <button style="width:100%;margin-top:8px;padding:8px;font-size:12px;color:var(--gym);border:0.5px dashed var(--border);background:transparent;border-radius:8px;" onclick="window.__addExInGroup('${g.id}')"><i class="ti ti-plus"></i> Add exercise</button>
+        </div>`
+      }).join('')}
+      <button style="width:100%;padding:12px;font-size:14px;color:var(--gym);border:0.5px dashed var(--border);background:transparent;border-radius:10px;" onclick="window.__addGroupInline()"><i class="ti ti-plus"></i> Add muscle group</button>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" onclick="window.__closeModal()">Cancel</button>
+      <button class="btn-save gym" onclick="window.__saveGroups()">Save all changes</button>
+    </div>`)
+
+  window.__delGroup = async id => {
+    if (!confirm('Delete this group and all its exercises + history?')) return
+    await sb.from('muscle_groups').delete().eq('id', id)
+    closeModal(); renderGym(root)
+  }
+  window.__delEx = async id => {
+    if (!confirm('Delete this exercise and all its history?')) return
+    await sb.from('exercises').delete().eq('id', id)
+    closeModal(); openGroupsManager(root)
+  }
+  window.__addExInGroup = async gid => {
+    const name = prompt('Exercise name?')
+    if (!name?.trim()) return
+    const list = state.gym.exercises[gid] || []
+    const maxOrder = list.reduce((a,b)=>Math.max(a,b.sort_order||0),0)
+    await sb.from('exercises').insert({ user_id: state.user.id, muscle_group_id: gid, name: name.trim(), sort_order: maxOrder+1 })
+    closeModal()
+    const gs2 = await sb.from('muscle_groups').select('*').order('sort_order')
+    const exs2 = await sb.from('exercises').select('*').order('sort_order')
+    state.gym.groups = gs2.data || []
+    state.gym.exercises = {}
+    ;(exs2.data || []).forEach(ex => { (state.gym.exercises[ex.muscle_group_id] ||= []).push(ex) })
+    openGroupsManager(root)
+  }
+  window.__addGroupInline = async () => {
+    const name = prompt('Group name?')
+    if (!name?.trim()) return
+    const maxOrder = state.gym.groups.reduce((a,b)=>Math.max(a,b.sort_order||0),0)
+    await sb.from('muscle_groups').insert({ user_id: state.user.id, name: name.trim(), sort_order: maxOrder+1 })
+    closeModal()
+    renderGym(root)
+  }
+  window.__saveGroups = async () => {
+    const gUpdates = [...document.querySelectorAll('.gm-name')].map(i => ({ id: i.dataset.id, name: i.value.trim() })).filter(x=>x.name)
+    const eUpdates = [...document.querySelectorAll('.em-name')].map(i => ({ id: i.dataset.id, name: i.value.trim() })).filter(x=>x.name)
+    for (const g of gUpdates) await sb.from('muscle_groups').update({ name: g.name }).eq('id', g.id)
+    for (const e of eUpdates) await sb.from('exercises').update({ name: e.name }).eq('id', e.id)
+    toast('Saved')
+    closeModal()
+    renderGym(root)
+  }
+}
+
+function openLogWorkoutModal(root, { session, exerciseId, defaultDate } = {}) {
+  const gid = state.gym.activeGroup
+  const groups = state.gym.groups
+  const exs = state.gym.exercises[gid] || []
+  const editing = !!session
+  const initialSets = editing
+    ? [...(session.workout_sets || [])].sort((a,b) => a.set_number - b.set_number).map(s => ({ reps: s.reps, weight: Number(s.weight_kg) }))
+    : [{ reps: 10, weight: 20 }]
+  const initialDate = editing ? session.performed_on : (defaultDate || todayISO())
+  const initialExId = exerciseId || session?.exercise_id || exs[0]?.id
+  const initialNotes = session?.notes || ''
+  const unit = state.weight.unit
+
+  const state_ = { setsData: [...initialSets], exId: initialExId, gid, date: initialDate, notes: initialNotes }
+
+  const renderModal = () => {
+    const exsForGroup = state.gym.exercises[state_.gid] || []
+    openModal(`
+      <div class="modal-header">
+        <div class="modal-close" onclick="window.__closeModal()"><i class="ti ti-x"></i></div>
+        <div class="modal-title">${editing ? 'Edit workout' : 'Log workout'}</div>
+        <div style="width:20px"></div>
+      </div>
+      <div class="modal-body">
+
+        <div style="font-size:12px;font-weight:500;color:var(--text-secondary);margin-bottom:6px;">Muscle group</div>
+        <div class="section-pills" style="margin-bottom:14px;">
+          ${groups.map(g => `<span class="lg-group" data-id="${g.id}" style="padding:7px 14px;font-size:13px;border:0.5px solid var(--border);border-radius:999px;cursor:pointer;${g.id===state_.gid?'background:var(--gym);color:white;font-weight:500;border-color:var(--gym);':''}">${esc(g.name)}</span>`).join('')}
+        </div>
+
+        <div style="font-size:12px;font-weight:500;color:var(--text-secondary);margin-bottom:6px;">Exercise</div>
+        <select class="form-input" id="lg-ex" style="margin-bottom:14px;">
+          ${exsForGroup.map(ex => `<option value="${ex.id}" ${ex.id === state_.exId ? 'selected' : ''}>${esc(ex.name)}</option>`).join('')}
+        </select>
+
+        <div style="font-size:12px;font-weight:500;color:var(--text-secondary);margin-bottom:6px;">Date</div>
+        <input class="form-input" type="date" id="lg-date" value="${state_.date}" max="${todayISO()}" style="margin-bottom:14px;" />
+
+        <div style="display:flex;justify-content:space-between;font-size:12px;font-weight:500;color:var(--text-secondary);margin-bottom:8px;">
+          <span>Sets</span><span style="color:var(--text-muted);font-weight:400;">sets × reps (weight)</span>
+        </div>
+
+        <div style="display:grid;grid-template-columns:32px 1fr 1fr 32px;gap:8px;align-items:center;margin-bottom:8px;font-size:11px;color:var(--text-muted);padding:0 4px;">
+          <div>#</div><div>Reps</div><div>Weight (${unit})</div><div></div>
+        </div>
+
+        <div id="lg-sets"></div>
+
+        <button type="button" id="lg-addset" style="width:100%;padding:10px;font-size:13px;border:0.5px dashed var(--border);background:transparent;border-radius:10px;color:var(--text-secondary);margin-top:4px;"><i class="ti ti-plus"></i> Add set</button>
+
+        <div style="font-size:12px;font-weight:500;color:var(--text-secondary);margin-top:16px;margin-bottom:6px;">Notes</div>
+        <textarea class="form-input" id="lg-notes" rows="2" style="resize:none;font-family:inherit;" placeholder="How did it feel?">${esc(state_.notes)}</textarea>
+
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" onclick="window.__closeModal()">Cancel</button>
+        <button class="btn-save gym" id="lg-save">${editing ? 'Save changes' : 'Save workout'}</button>
+      </div>`)
+
+    const renderSets = () => {
+      const setsWrap = document.getElementById('lg-sets')
+      setsWrap.innerHTML = state_.setsData.map((s,i) => `
+        <div style="display:grid;grid-template-columns:32px 1fr 1fr 32px;gap:8px;align-items:center;margin-bottom:8px;">
+          <div style="text-align:center;font-size:13px;font-weight:500;color:var(--text-secondary);">${i+1}</div>
+          <div class="field-inline"><input type="number" min="1" data-i="${i}" data-f="reps" value="${s.reps}" /></div>
+          <div class="field-inline"><input type="number" step="0.5" data-i="${i}" data-f="weight" value="${s.weight}" /></div>
+          <button data-del="${i}" style="padding:6px;color:var(--text-muted);"><i class="ti ti-trash"></i></button>
+        </div>`).join('')
+      setsWrap.querySelectorAll('input').forEach(inp => inp.oninput = () => {
+        state_.setsData[Number(inp.dataset.i)][inp.dataset.f] = parseFloat(inp.value) || 0
+      })
+      setsWrap.querySelectorAll('[data-del]').forEach(b => b.onclick = () => {
+        if (state_.setsData.length <= 1) return toast('Need at least 1 set', true)
+        state_.setsData.splice(Number(b.dataset.del), 1)
+        renderSets()
+      })
+    }
+    renderSets()
+
+    document.querySelectorAll('.lg-group').forEach(g => g.onclick = () => {
+      state_.gid = g.dataset.id
+      const first = state.gym.exercises[state_.gid]?.[0]
+      state_.exId = first?.id
+      state_.date = document.getElementById('lg-date').value
+      state_.notes = document.getElementById('lg-notes').value
+      renderModal()
+    })
+    document.getElementById('lg-ex').onchange = e => state_.exId = e.target.value
+    document.getElementById('lg-date').onchange = e => state_.date = e.target.value
+    document.getElementById('lg-notes').oninput = e => state_.notes = e.target.value
+    document.getElementById('lg-addset').onclick = () => {
+      const last = state_.setsData[state_.setsData.length-1]
+      state_.setsData.push({ reps: last?.reps || 10, weight: last?.weight || 20 })
+      renderSets()
+    }
+    document.getElementById('lg-save').onclick = async () => {
+      if (!state_.exId) return toast('Pick an exercise', true)
+      if (!state_.setsData.length) return toast('Add at least one set', true)
+      const validSets = state_.setsData.filter(s => s.reps > 0 && s.weight >= 0)
+      if (!validSets.length) return toast('Fill in your sets', true)
+      const maxSetKg = validSets.reduce((a,s) => {
+        const kg = unit === 'lbs' ? lbsToKg(Number(s.weight)) : Number(s.weight)
+        return Math.max(a, kg)
+      }, 0)
+
+      // PR detection: compare against previous max
+      const { data: prior } = await sb.from('workout_sessions').select('max_weight_kg').eq('exercise_id', state_.exId).order('max_weight_kg', { ascending: false }).limit(1)
+      const prevMax = prior?.[0]?.max_weight_kg || 0
+      const isPR = !editing && maxSetKg > Number(prevMax)
+
+      let sessionId
+      if (editing) {
+        await sb.from('workout_sessions').update({
+          performed_on: state_.date, notes: state_.notes || null,
+          max_weight_kg: maxSetKg, is_pr: session.is_pr,
+        }).eq('id', session.id)
+        await sb.from('workout_sets').delete().eq('session_id', session.id)
+        sessionId = session.id
+      } else {
+        const { data: newS, error } = await sb.from('workout_sessions').insert({
+          user_id: state.user.id, exercise_id: state_.exId, performed_on: state_.date,
+          notes: state_.notes || null, max_weight_kg: maxSetKg, is_pr: isPR,
+        }).select('id').single()
+        if (error) return toast(error.message, true)
+        sessionId = newS.id
+      }
+      const setsToInsert = validSets.map((s,i) => ({
+        session_id: sessionId,
+        set_number: i+1,
+        reps: Math.round(Number(s.reps)),
+        weight_kg: unit === 'lbs' ? lbsToKg(Number(s.weight)) : Number(s.weight),
+      }))
+      await sb.from('workout_sets').insert(setsToInsert)
+      toast(isPR ? '🎉 New PR!' : 'Workout logged')
+      closeModal()
+      renderGym(root)
+    }
+  }
+  renderModal()
+}
+
+// Go
+bootstrap()
+</script>
+
+</body>
+</html>
