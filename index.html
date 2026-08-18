@@ -1713,8 +1713,19 @@ function openLogWorkoutModal(root, { session, exerciseId, defaultDate, prefillFr
     document.getElementById('lg-save').onclick = async () => {
       if (!state_.exId) return toast('Pick an exercise', true)
       if (!state_.setsData.length) return toast('Add at least one set', true)
-      const validSets = state_.setsData.filter(s => s.reps > 0 && s.weight >= 0)
-      if (!validSets.length) return toast('Fill in your sets', true)
+      const validSets = state_.setsData.filter(s => s.reps > 0)
+      if (!validSets.length) {
+        if (editing) {
+          if (!confirm('All sets are empty — delete this session?')) return
+          await sb.from('workout_sessions').delete().eq('id', session.id)
+          toast('Session deleted')
+        } else {
+          toast('No workout logged')
+        }
+        closeModal()
+        renderGym(root)
+        return
+      }
       const maxSetKg = validSets.reduce((a,s) => {
         const kg = unit === 'lbs' ? lbsToKg(Number(s.weight)) : Number(s.weight)
         return Math.max(a, kg)
