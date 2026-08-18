@@ -1201,12 +1201,6 @@ async function renderGym(root) {
   root.querySelector('#gd-prev').onclick = () => { const d = new Date(selDate); d.setDate(d.getDate()-1); state.gym.date = d.toISOString().slice(0,10); renderGym(root) }
   root.querySelector('#gd-next').onclick = () => { const d = new Date(selDate); d.setDate(d.getDate()+1); const iso = d.toISOString().slice(0,10); if (iso > todayISO()) return; state.gym.date = iso; renderGym(root) }
 
-  root.insertAdjacentHTML('beforeend', `
-    <div style="padding:10px 16px 4px;display:flex;justify-content:flex-end;">
-      <i class="ti ti-settings" style="font-size:20px;color:var(--gym);cursor:pointer;" id="gym-settings"></i>
-    </div>`)
-  root.querySelector('#gym-settings').onclick = () => openGroupsManager(root)
-
   // Load groups + exercises
   const [{ data: groups }, { data: exercises }] = await Promise.all([
     sb.from('muscle_groups').select('*').order('sort_order'),
@@ -1231,28 +1225,25 @@ async function renderGym(root) {
     state.gym.activeGroup = state.gym.groups[0].id
   }
 
-  // Load latest sessions + max weights for all exercises in the active group
+  // Load latest 3 sessions for each exercise in the active group
   const activeExercises = state.gym.exercises[state.gym.activeGroup] || []
   const exIds = activeExercises.map(e => e.id)
-  let prs = {}
+  const sessionsByEx = {}
   if (exIds.length) {
     const { data: sessions } = await sb.from('workout_sessions')
       .select('id,exercise_id,performed_on,max_weight_kg,is_pr,workout_sets(reps,weight_kg,set_number)')
       .in('exercise_id', exIds)
       .order('performed_on', { ascending: false })
     ;(sessions || []).forEach(s => {
-      if (!prs[s.exercise_id]) {
-        // Latest session (most recent)
-        const heaviestSet = (s.workout_sets || []).reduce((a,b) => Number(b.weight_kg) > Number(a?.weight_kg || 0) ? b : a, null)
-        prs[s.exercise_id] = {
-          latest: s,
-          heaviestSet,
-          setsCount: (s.workout_sets || []).length,
-        }
-      }
+      const list = (sessionsByEx[s.exercise_id] ||= [])
+      if (list.length < 3) list.push(s)
     })
   }
-  state.gym.prs = prs
+  const summarize = s => {
+    const heaviest = (s.workout_sets || []).reduce((a,b) => Number(b.weight_kg) > Number(a?.weight_kg || 0) ? b : a, null)
+    return { session: s, heaviest, setsCount: (s.workout_sets || []).length }
+  }
+  state.gym.prs = sessionsByEx
 
   // Tabs
   const tabsHTML = state.gym.groups.map(g => `
@@ -1284,36 +1275,57 @@ async function renderGym(root) {
     return
   }
 
-  // Exercise cards
+  const unit = state.weight.unit
+  const lineFor = s => {
+    const sum = summarize(s)
+    if (!sum.heaviest) return null
+    return `${sum.setsCount} × ${sum.heaviest.reps} <span style="font-weight:500;color:var(--gym-dark);">(${dispWeight(Number(sum.heaviest.weight_kg), unit)}${unit})</span>`
+  }
+  const lineForCompact = s => {
+    const sum = summarize(s)
+    if (!sum.heaviest) return null
+    return `${sum.setsCount}×${sum.heaviest.reps} (${dispWeight(Number(sum.heaviest.weight_kg), unit)}${unit})`
+  }
+
+  // Exercise cards — tap to instantly log for this exercise
   activeExercises.forEach(ex => {
-    const pr = prs[ex.id]
-    const latest = pr?.latest
-    const heaviest = pr?.heaviestSet
-    const badge = latest?.is_pr ? '<span class="chip chip-pr-red"><i class="ti ti-arrow-up"></i> PR</span>' : ''
-    const line = heaviest
-      ? `${pr.setsCount} × ${heaviest.reps} <span style="font-weight:500;color:var(--gym-dark);">(${dispWeight(Number(heaviest.weight_kg), state.weight.unit)}${state.weight.unit})</span>`
-      : '<span style="color:var(--text-muted);font-size:14px;">No sessions yet</span>'
-    const dateStr = latest ? `Last logged ${fmtDate(latest.performed_on, {smart:true})}` : ''
+    const sessions = sessionsByEx[ex.id] || []
+    const latest = sessions[0]
+    const prev = sessions[1]
+    const badge = latest?.is_pr ? '<span class="chip chip-pr-red" style="align-self:flex-start;"><i class="ti ti-arrow-up"></i> PR</span>' : ''
+    const mainLine = latest ? lineFor(latest) : '<span style="color:var(--text-muted);font-size:14px;">Tap to log first session</span>'
+    const prevLine = prev ? `<div style="font-size:12px;color:var(--gym-mid);opacity:0.75;margin-top:6px;">prev · ${lineForCompact(prev)} · ${fmtDate(prev.performed_on, {smart:true})}</div>` : ''
+    const dateStr = latest ? `<div style="font-size:11px;color:var(--gym-mid);margin-top:6px;opacity:0.8;">Last logged ${fmtDate(latest.performed_on, {smart:true})}</div>` : ''
     body.insertAdjacentHTML('beforeend', `
-      <div class="ex-card" data-id="${ex.id}" style="padding:14px 16px;border:0.5px solid var(--gym-border);background:var(--gym-bg);border-radius:12px;margin-bottom:10px;cursor:pointer;">
-        <div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:6px;">
+      <div class="ex-card" data-id="${ex.id}" style="padding:14px 16px;border:0.5px solid var(--gym-border);background:var(--gym-bg);border-radius:12px;margin-bottom:10px;cursor:pointer;position:relative;">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:6px;">
           <span style="font-size:14px;color:var(--gym-mid);font-weight:500;">${esc(ex.name)}</span>
-          ${badge}
+          <div style="display:flex;align-items:center;gap:8px;">
+            ${badge}
+            <i class="ti ti-pencil ex-edit" data-id="${ex.id}" style="font-size:16px;color:var(--gym);cursor:pointer;padding:4px;"></i>
+          </div>
         </div>
-        <div style="font-size:20px;color:var(--gym-mid);">${line}</div>
-        ${dateStr ? `<div style="font-size:11px;color:var(--gym-mid);margin-top:4px;opacity:0.8;">${dateStr}</div>` : ''}
+        <div style="font-size:20px;color:var(--gym-mid);">${mainLine}</div>
+        ${prevLine}
+        ${dateStr}
       </div>`)
   })
-  body.querySelectorAll('.ex-card').forEach(c => c.onclick = () => {
-    state.gym.chartExercise = c.dataset.id
-    renderGym(root)
+  body.querySelectorAll('.ex-card').forEach(c => c.onclick = e => {
+    if (e.target.closest('.ex-edit')) return
+    const exId = c.dataset.id
+    const prefill = (sessionsByEx[exId] || [])[0]
+    openLogWorkoutModal(root, { exerciseId: exId, defaultDate: selDate, prefillFromSession: prefill })
+  })
+  body.querySelectorAll('.ex-edit').forEach(icon => icon.onclick = e => {
+    e.stopPropagation()
+    const exId = icon.dataset.id
+    const ex = activeExercises.find(x => x.id === exId)
+    if (ex) openEditExerciseModal(root, ex)
   })
 
   body.insertAdjacentHTML('beforeend', `
-    <button class="btn-save gym" style="width:100%;padding:14px;margin-top:12px;" onclick="window.__logWorkout()"><i class="ti ti-plus" style="margin-right:6px;"></i>${isTodayG ? 'Log workout' : `Log workout for ${fmtDate(selDate)}`}</button>
     <button style="width:100%;padding:10px;margin-top:8px;border:0.5px dashed var(--gym-border);color:var(--gym);background:transparent;border-radius:10px;font-size:13px;" onclick="window.__addExercise()"><i class="ti ti-plus"></i> Add exercise</button>
   `)
-  window.__logWorkout = () => openLogWorkoutModal(root, { defaultDate: selDate })
   window.__addExercise = () => addExercisePrompt(root)
 
   // Progression chart for selected exercise
@@ -1337,9 +1349,12 @@ async function renderGymChart(root, ex) {
 
   const container = document.createElement('div')
   container.style.cssText = 'padding: 4px 14px 24px;'
+  const activeExs = state.gym.exercises[state.gym.activeGroup] || []
   container.innerHTML = `
-    <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 4px 10px;">
-      <div style="font-size:13px;font-weight:500;">${esc(ex.name)} progression</div>
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 4px 10px;">
+      <select id="gm-exercise" style="flex:1;min-width:0;padding:6px 10px;font-size:13px;font-weight:500;border:0.5px solid var(--gym-border);border-radius:8px;background:var(--surface);color:var(--gym-dark);">
+        ${activeExs.map(x => `<option value="${x.id}" ${x.id===ex.id?'selected':''}>${esc(x.name)} progression</option>`).join('')}
+      </select>
       <div class="pill gm-range" style="border-color:var(--gym-border);color:var(--gym-dark);"><i class="ti ti-calendar" style="color:var(--gym);"></i><span style="font-weight:500;">${rangeLabel(range)}</span><i class="ti ti-chevron-down" style="color:var(--gym);"></i></div>
     </div>
     <div id="gm-chart"></div>
@@ -1347,6 +1362,10 @@ async function renderGymChart(root, ex) {
   root.appendChild(container)
 
   container.querySelector('.gm-range').onclick = () => openRangeMenu('gym', root)
+  container.querySelector('#gm-exercise').onchange = e => {
+    state.gym.chartExercise = e.target.value
+    renderGym(root)
+  }
 
   const chart = container.querySelector('#gm-chart')
   const info = container.querySelector('#gm-info')
@@ -1439,6 +1458,48 @@ function addGroupPrompt(root) {
     const maxOrder = state.gym.groups.reduce((a,b)=>Math.max(a,b.sort_order||0),0)
     const { error } = await sb.from('muscle_groups').insert({ user_id: state.user.id, name, sort_order: maxOrder+1 })
     if (error) return toast(error.message, true)
+    closeModal()
+    renderGym(root)
+  }
+}
+
+function openEditExerciseModal(root, ex) {
+  openModal(`
+    <div class="modal-header">
+      <div class="modal-close" onclick="window.__closeModal()"><i class="ti ti-x"></i></div>
+      <div class="modal-title">Edit exercise</div>
+      <div style="width:20px"></div>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">Name</label>
+        <input class="form-input" id="ee-name" value="${esc(ex.name)}" autofocus />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Muscle group</label>
+        <select class="form-input" id="ee-group">
+          ${state.gym.groups.map(g => `<option value="${g.id}" ${g.id === ex.muscle_group_id ? 'selected' : ''}>${esc(g.name)}</option>`).join('')}
+        </select>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-danger" onclick="window.__delEx()"><i class="ti ti-trash"></i></button>
+      <button class="btn-save gym" onclick="window.__saveEditEx()">Save</button>
+    </div>`)
+  window.__saveEditEx = async () => {
+    const name = document.getElementById('ee-name').value.trim()
+    const gid = document.getElementById('ee-group').value
+    if (!name) return toast('Enter a name', true)
+    const { error } = await sb.from('exercises').update({ name, muscle_group_id: gid }).eq('id', ex.id)
+    if (error) return toast(error.message, true)
+    toast('Updated')
+    closeModal()
+    renderGym(root)
+  }
+  window.__delEx = async () => {
+    if (!confirm(`Delete "${ex.name}" and all its history?`)) return
+    await sb.from('exercises').delete().eq('id', ex.id)
+    toast('Deleted')
     closeModal()
     renderGym(root)
   }
@@ -1550,13 +1611,17 @@ function openGroupsManager(root) {
   }
 }
 
-function openLogWorkoutModal(root, { session, exerciseId, defaultDate } = {}) {
+function openLogWorkoutModal(root, { session, exerciseId, defaultDate, prefillFromSession } = {}) {
   const gid = state.gym.activeGroup
   const groups = state.gym.groups
   const exs = state.gym.exercises[gid] || []
   const editing = !!session
-  const initialSets = editing
-    ? [...(session.workout_sets || [])].sort((a,b) => a.set_number - b.set_number).map(s => ({ reps: s.reps, weight: Number(s.weight_kg) }))
+  const prefillSource = editing ? session : prefillFromSession
+  const initialSets = prefillSource && (prefillSource.workout_sets || []).length
+    ? [...prefillSource.workout_sets].sort((a,b) => a.set_number - b.set_number).map(s => ({
+        reps: s.reps,
+        weight: state.weight.unit === 'lbs' ? kgToLbs(Number(s.weight_kg)) : Number(s.weight_kg),
+      }))
     : [{ reps: 10, weight: 20 }]
   const initialDate = editing ? session.performed_on : (defaultDate || todayISO())
   const initialExId = exerciseId || session?.exercise_id || exs[0]?.id
